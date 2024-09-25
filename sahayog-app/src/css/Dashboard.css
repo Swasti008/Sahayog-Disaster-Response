@@ -1,0 +1,134 @@
+/* Basic styling for dashboard */
+
+.dashboard {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logo {
+  height: 50px;
+}
+
+.alert-overview {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.alert-card {
+  width: 30%;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.critical {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.moderate {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.low {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-card h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.alert-card p {
+  font-size: 24px;
+  margin-top: 10px;
+}
+
+.recent-alerts {
+  margin-bottom: 20px;
+}
+
+.recent-alerts h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.marquee {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.alerts-container {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.alert-item {
+  display: inline-block;
+  min-width: 200px;
+  color: white;
+  padding: 15px;
+  margin-right: 10px;
+  border-radius: 10px;
+}
+
+
+.location {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.type {
+  font-size: 14px;
+}
+
+.time-date {
+  font-size: 12px;
+}
+
+.latest-reports {
+  margin-bottom: 20px;
+}
+
+.latest-reports h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.chart-container {
+  flex: 1; /* Chart takes up less space */
+  display: flex;
+  justify-content: flex-end; /* Align the chart to the right */
+}
+
+.pie-chart {
+  width: 100%; /* Adjust as necessary */
+  max-width: 400px; /* Ensure chart doesn't grow too large */
+}
