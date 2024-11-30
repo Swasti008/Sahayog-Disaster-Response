@@ -46,6 +46,8 @@ const MainDash = () => {
       setActiveItem("alerts");
     } else if (location.pathname === "/dashboard/profile") {
       setActiveItem("profile");
+    } else if (location.pathname == "/") {
+      setActiveItem("home")
     }
   }, [location]);
 
@@ -55,6 +57,17 @@ const MainDash = () => {
         <div className="flex flex-1">
           <Sidebar className="w-64 bg-gray-200 shadow-2xl">
             {/* Dashboard Sidebar Item */}
+
+            <Link to="/">
+              <SidebarItem
+                icon={<Home size={20} />}
+                text="Home"
+                active={activeItem === "home"}
+                alert={false}
+                onClick={() => setActiveItem("home")}
+              />
+            </Link>
+
             <Link to="/dashboard">
               <SidebarItem
                 icon={<Home size={20} />}
@@ -96,8 +109,8 @@ const MainDash = () => {
 
           {/* Main content */}
           <main
-            className="flex-1 p-4 bg-gray-100 w-[60%]"
-            style={{ height: "calc(100vh - 60px)", overflow: "scroll" }}
+            className="flex-1 p- bg-gray-100 w-[60%]"
+            style={{ height: "calc(100vh - 0px)", overflowY: "scroll" }}
           >
             <Routes>
               <Route path="/" element={<Dashboard alerts={alerts} />} />
