@@ -1,19 +1,20 @@
 // src/App.js
-import React from "react";
-import Header from "../components/TopHeader";
-import Sidebar from "../components/SideNav";
+import React, { useState, useEffect } from "react";
+import { Route, Routes, Link, useLocation } from "react-router-dom";
+import Sidebar, { SidebarItem } from "../components/SideNav";
 import Dashboard from "../components/Dahboard";
 import InteractiveMap from "../components/InterativeMap";
-import { Route, Routes } from "react-router-dom";
+import { Home, Bell, MapPin, User } from "lucide-react";
 import { Typography } from "@mui/material";
 import io from "socket.io-client";
-import { useState,useEffect } from "react";
 import FetchData from "../components/services/FetchData";
 
 const socket = io("http://localhost:3000"); // Connect to the server
 
 const MainDash = () => {
   const [alerts, setAlerts] = useState([]);
+  const [activeItem, setActiveItem] = useState("dashboard"); // Track active sidebar item
+  const location = useLocation(); // To track route changes
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,7 +27,6 @@ const MainDash = () => {
     // Listen for the 'newEntry' event from the server
     socket.on("newEntry", (data) => {
       console.log("Received new entry: ", data);
-      // You can update the state with new data if necessary
       setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]); // Add the new alert to the top
     });
 
@@ -35,16 +35,64 @@ const MainDash = () => {
       socket.off("newEntry");
     };
   }, []);
+
+  // Set active item based on route change
+  useEffect(() => {
+    if (location.pathname === "/dashboard") {
+      setActiveItem("dashboard");
+    } else if (location.pathname === "/dashboard/map") {
+      setActiveItem("map");
+    } else if (location.pathname === "/dashboard/alerts") {
+      setActiveItem("alerts");
+    } else if (location.pathname === "/dashboard/profile") {
+      setActiveItem("profile");
+    }
+  }, [location]);
+
   return (
     <>
       <div className="flex flex-col">
-        {/* Header */}
-        <Header />
-
-        {/* Content wrapper */}
         <div className="flex flex-1">
-          {/* Sidebar */}
-          <Sidebar className="w-64 bg-gray-200 shadow-2xl " />
+          <Sidebar className="w-64 bg-gray-200 shadow-2xl">
+            {/* Dashboard Sidebar Item */}
+            <Link to="/dashboard">
+              <SidebarItem
+                icon={<Home size={20} />}
+                text="Dashboard"
+                active={activeItem === "dashboard"}
+                alert={false}
+                onClick={() => setActiveItem("dashboard")}
+              />
+            </Link>
+
+            {/* Alerts Sidebar Item */}
+            <a
+              href="#latestReport"
+              onClick={(e) => {
+                e.preventDefault();
+                document.querySelector("#latestReport").scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <SidebarItem
+                icon={<Bell size={24} />}
+                text="Alerts"
+                active={activeItem === "alerts"}
+                alert={true}
+                onClick={() => setActiveItem("alerts")}
+              />
+            </a>
+
+            {/* Map Overview Sidebar Item */}
+            <Link to="/dashboard/map">
+              <SidebarItem
+                icon={<MapPin size={20} />}
+                text="Map Overview"
+                active={activeItem === "map"}
+                alert={false}
+                onClick={() => setActiveItem("map")}
+              />
+            </Link>
+          </Sidebar>
 
           {/* Main content */}
           <main
@@ -52,17 +100,16 @@ const MainDash = () => {
             style={{ height: "calc(100vh - 60px)", overflow: "scroll" }}
           >
             <Routes>
-              <Route path="/" element={<Dashboard alerts={alerts}/>} />
+              <Route path="/" element={<Dashboard alerts={alerts} />} />
               <Route
                 path="/map"
                 element={
                   <>
                     <div className="px-4 py-5">
                       <Typography variant="h5">Map Overview</Typography>
-                      <hr></hr>
+                      <hr />
                     </div>
-                    <InteractiveMap disasters={alerts}/>
-
+                    <InteractiveMap disasters={alerts} />
                   </>
                 }
               />

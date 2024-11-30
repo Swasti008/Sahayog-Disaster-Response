@@ -5,10 +5,21 @@ import CardComponent from "./cardComponent";
 import SearchBar from "./SearchBar";
 import { Typography } from "@mui/material";
 import moment from "moment";
+import '../css/navbar.css'
 
 const Dashboard = ({ alerts }) => {
   return (
     <div className="p-6">
+      {/* Floating Navbar */}
+      <nav className="navbar">
+      <div className="navbar-container">
+        <a href="/" className="navbar-item">Home</a>
+        <a href="/about" className="navbar-item">About</a>
+        <a href="/contact" className="navbar-item">Contact</a>
+        <a href="/login" className="navbar-item login-button">Login</a>
+      </div>
+    </nav>
+
       <section id="AlertOverview">
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
