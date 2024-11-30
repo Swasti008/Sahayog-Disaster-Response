@@ -18,6 +18,7 @@ const MainDash = () => {
   useEffect(() => {
     const fetchData = async () => {
       const result = await FetchData();
+      console.log(result);
       setAlerts(result);
     };
 
