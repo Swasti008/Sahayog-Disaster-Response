@@ -1,223 +1,208 @@
-import React, { useEffect, useState } from "react";
-import {
-  Card,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Divider,
-  IconButton,
-} from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import WarningIcon from "@mui/icons-material/Warning";
-import VerifiedIcon from "@mui/icons-material/Verified";
-import moment from "moment";
-import Image from "../assets/image.png"; // Placeholder image
-import FetchData from "./services/FetchData";
+import React, { useState } from "react";
+import { 
+  MapPin, 
+  Clock, 
+  AlertTriangle, 
+  ShieldCheck, 
+  Camera, 
+  X 
+} from "lucide-react";
 
-const CardComponent = ({data}) => {
-  const [openDialog, setOpenDialog] = useState(false);
+import { useEffect } from "react";
+
+const CardComponent = ({ data, viewMode = 'scroll' }) => {
   const [selectedAlert, setSelectedAlert] = useState(null);
 
+  useEffect(()=>{
+    console.log(data)
+  },[data])
+
+  // Custom date formatting function
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getAlertTypeColor = (type) => {
+    const colorMap = {
+      'warning': 'bg-yellow-100 text-yellow-800',
+      'critical': 'bg-red-100 text-red-800',
+      'info': 'bg-blue-100 text-blue-800',
+      'normal': 'bg-green-100 text-green-800'
+    };
+    return colorMap[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  };
 
   const handleDetailClick = (alert) => {
     setSelectedAlert(alert);
-    setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseModal = () => {
     setSelectedAlert(null);
   };
 
-  return (
-    <>
-      {data && data.map((e) => (
-        <Card key={e._id} className="w-100 bg-gray-100 shadow-lg mb-4">
-          <div className="p-4 m-0 bg-gray-300">
-            <Typography
-              variant="h6"
-              className="bg-gray-500 text-white w-fit pr-2 pl-2 rounded-full font-bold mb-2"
+  const renderAlertCard = (alert) => (
+    <div 
+      key={alert._id} 
+      className={`
+        bg-white rounded-3xl shadow-lg transition-all duration-300 ease-in-out mb-6 overflow-hidden border-l-8 
+        ${viewMode === 'grid' ? 'grid-card-style' : ''}
+        hover:shadow-2xl hover:scale-[1.02] hover:opacity-95
+      `}
+      style={{
+        borderLeftColor: alert.type === 'critical' ? '#EF4444' : 
+                         alert.type === 'warning' ? '#F59E0B' : 
+                         alert.type === 'info' ? '#3B82F6' : '#10B981'
+      }}
+    >
+
+      <div className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md`}>
+        {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)} {/* Capitalize disaster type */}
+      </div>
+
+      <div className="p-6 ">
+        <div className={`
+          grid grid-cols-1 gap-4
+          ${viewMode === 'grid' ? 'grid-view-layout' : 'md:grid-cols-2'}
+        `}>
+          <div>
+            {/* Location and timestamp details */}
+            <div className="flex items-center text-gray-600 mb-2">
+              <MapPin className="mr-2 text-blue-500" size={20} />
+              <span className="font-medium">
+                {alert.location?.city}, {alert.location?.state}, {alert.location?.country}
+              </span>
+            </div>
+            <div className="flex items-center text-gray-600 mb-2">
+              <Clock className="mr-2 text-blue-500" size={20} />
+              <span>
+                {formatDate(alert.timestamp)}
+              </span>
+            </div>
+            <p className="text-gray-700 mt-2 bg-gray-50 p-3 rounded-lg border-l-4 border-blue-500">
+              <strong>Description:</strong> {alert.description}
+            </p>
+          </div>
+          <div className={`
+            flex justify-end items-start
+            ${viewMode === 'grid' ? 'grid-view-button-container' : ''}
+          `}>
+            <button 
+              onClick={() => handleDetailClick(alert)}
+              className="bg-gradient-to-r from-blue-400 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-200 ease-in-out"
             >
-              {e.type?.charAt(0).toUpperCase() + e.type?.slice(1)}
-            </Typography>
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  ;
 
-            <div className="flex justify-between m-5">
-              <div>
-                <Typography variant="body2" className="text-gray-600 mb-1">
-                  <span className="font-semibold">Location:</span>{" "}
-                  {e.location?.city ? `${e.location.city},` : ""}{" "}
-                  {e.location?.state ? `${e.location.state},` : ""}{" "}
-                  {e.location?.country}
-                </Typography>
+  const renderDetailModal = () => {
+    if (!selectedAlert) return null;
 
-                <Typography
-                  variant="body2"
-                  className="text-gray-600 mb-1 flex gap-7"
-                >
-                  <span className="font-semibold">
-                    Time: {moment(e.timestamp).format("h:mm A")}
-                  </span>
-                  <span className="font-semibold">
-                    Date: {moment(e.timestamp).format("DD/MMM/YYYY")}
-                  </span>
-                </Typography>
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center backdrop-blur-sm">
+        <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative shadow-2xl">
+          <button 
+            onClick={handleCloseModal} 
+            className="absolute top-4 right-4 bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-full transition-colors group"
+          >
+            <X size={24} className="group-hover:rotate-90 transition-transform" />
+          </button>
 
-                <Typography variant="body2" className="text-gray-600 mt-2">
-                  <span className="font-semibold">Description:</span>{" "}
-                  {e.description}
-                </Typography>
+          <h2 className="text-3xl font-bold mb-6 text-gray-800 flex items-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+            <AlertTriangle className="mr-3 text-blue-500" size={32} />
+            {selectedAlert.type.charAt(0).toUpperCase() + selectedAlert.type.slice(1)} Alert Details
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <div className="mb-6 bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg shadow-md">
+                <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                  <MapPin className="mr-2 text-blue-500" size={20} />
+                  Location
+                </h3>
+                <p className="text-gray-600 font-medium">
+                  {selectedAlert.location.city}, {selectedAlert.location.state}, {selectedAlert.location.country}
+                </p>
+              </div>
+
+              <div className="mb-6 bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg shadow-md">
+                <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                  <Clock className="mr-2 text-blue-500" size={20} />
+                  Timestamp
+                </h3>
+                <p className="text-gray-600 font-medium">
+                  {formatDate(selectedAlert.timestamp)}
+                </p>
+              </div>
+
+              <div className="mb-6 bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg shadow-md">
+                <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                  <ShieldCheck className="mr-2 text-blue-500" size={20} />
+                  Additional Details
+                </h3>
+                <div className="space-y-2">
+                  <p><strong>Severity:</strong> {selectedAlert.criticality?.severity || 'N/A'}</p>
+                  <p><strong>Credibility:</strong> {selectedAlert.numberOfPosts || 'N/A'}</p>
+                  <p>
+                    <strong>Coordinates:</strong> 
+                    {` ${selectedAlert.location.coordinates.latitude}, ${selectedAlert.location.coordinates.longitude}`}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-between gap-6 w-fit mt-4 ">
-              <Button
-                variant="contained"
-                color="primary"
-                className="bg-blue-500 hover:bg-blue-600"
-              >
-                Approve
-              </Button>
-              <Button
-                variant="contained"
-                color="info"
-                className="bg-cyan-500 hover:bg-cyan-600"
-                onClick={() => handleDetailClick(e)}
-              >
-                Details
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                className="bg-red-500 hover:bg-red-600"
-              >
-                Reject
-              </Button>
-            </div>
-          </div>
-        </Card>
-      ))}
-
-      {selectedAlert && (
-        <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>
-            <Typography variant="h5" fontWeight="bold">
-              {selectedAlert.type.charAt(0).toUpperCase() +
-                selectedAlert.type.slice(1)}{" "}
-              Alert
-            </Typography>
-          </DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={8}>
-                <Typography variant="h6" gutterBottom>
-                  <LocationOnIcon /> Location
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {selectedAlert.location.city}, {selectedAlert.location.state},{" "}
-                  {selectedAlert.location.country}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  <AccessTimeIcon /> Date and Time of Occurrence
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {moment(selectedAlert.timestamp).format(
-                    "DD/MMM/YYYY, h:mm A"
-                  )}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  <VerifiedIcon /> Status
-                </Typography>
-                <Typography variant="body1" paragraph>
-                   Not reviewed
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  <WarningIcon /> Severity
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {selectedAlert.criticality?.severity ?selectedAlert.criticality.severity:"N/A"}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Credibility Score
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {selectedAlert.numberOfPosts || "N/A"}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="h6" gutterBottom>
-                  Coordinates
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Latitude: {selectedAlert.location.coordinates.latitude},
-                  Longitude: {selectedAlert.location.coordinates.longitude}
-                </Typography>
-              </Grid>
-
-              <Grid item xs={12} md={4} className="media-section">
-                <Typography variant="h6" gutterBottom>
+            <div>
+              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg shadow-md">
+                <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                  <Camera className="mr-2 text-blue-500" size={20} />
                   Media Attachment
-                </Typography>
+                </h3>
                 {selectedAlert.media ? (
-                  <div style={{ textAlign: "center" }}>
-                    <img
-                      src={Image}
-                      alt="default"
-                      style={{
-                        width: "100%",
-                        height: "auto",
-                        borderRadius: "8px",
-                      }}
+                  <div className="text-center">
+                    <img 
+                      src="/api/placeholder/400/320" 
+                      alt="Alert media" 
+                      className="rounded-lg mb-4 max-h-[400px] w-full object-cover shadow-lg hover:scale-105 transition-transform"
                     />
-                    <IconButton
-                      onClick={() =>
-                        window.open(selectedAlert.media.url, "_blank")
-                      }
-                      color="primary"
+                    <a 
+                      href={selectedAlert.media.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
                     >
                       Open Full Image
-                    </IconButton>
+                    </a>
                   </div>
                 ) : (
-                  <Typography>No media attached</Typography>
+                  <p className="text-gray-500 italic">No media attached</p>
                 )}
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseDialog}
-              variant="contained"
-              color="primary"
-            >
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      )}
-    </>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
+        {data?.map(alert => renderAlertCard(alert))}
+      </div>
+      {renderDetailModal()}
+    </div>
   );
 };
 

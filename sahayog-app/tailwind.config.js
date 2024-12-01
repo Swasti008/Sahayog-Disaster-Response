@@ -9,6 +9,7 @@ export default {
         customGray: "#EDE8E8",
         primary: "#1d4ed8", // Custom color example
         secondary: "#9333ea",
+        'custom-light-blue': '#eff6ff',
       },
       spacing: {
         128: "32rem", // Example custom spacing

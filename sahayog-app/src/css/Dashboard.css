@@ -132,3 +132,13 @@
   width: 100%; /* Adjust as necessary */
   max-width: 400px; /* Ensure chart doesn't grow too large */
 }
+
+.scroll-active {
+  overflow-y: auto !important; /* Enable internal scrolling */
+  max-height: 500px;
+}
+
+#latestReport {
+  overflow: hidden; /* Disable internal scrolling initially */
+  transition: max-height 0.3s ease;
+}
