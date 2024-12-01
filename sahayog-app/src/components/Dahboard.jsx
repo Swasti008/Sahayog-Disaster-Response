@@ -1,76 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import "../css/Dashboard.css";
 import PieChart from "./PieChart";
 import CardComponent from "./CardComponent";
 import moment from "moment";
-import { useMemo } from "react";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
 
 const Dashboard = ({ alerts }) => {
-  // State to manage the current view and sorting
   const [viewMode, setViewMode] = useState("scroll");
-  const [sortOrder, setSortOrder] = useState("newest"); // 'newest', 'oldest'
+  const [sortOrder, setSortOrder] = useState("newest");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [selectedType, setSelectedType] = useState("all");
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Dynamic search functionality
-  const filteredAlerts = useMemo(() => {
-    if (!searchTerm) return alerts;
-
-    // Convert search term to lowercase for case-insensitive search
-    const lowercasedSearch = searchTerm.toLowerCase();
-
-    // Search across multiple fields
-    return alerts.filter(alert => 
-      (alert.location?.city && alert.location.city.toLowerCase().includes(lowercasedSearch)) ||
-      (alert.location?.state && alert.location.state.toLowerCase().includes(lowercasedSearch)) ||
-      (alert.type && alert.type.toLowerCase().includes(lowercasedSearch)) ||
-      // Optional: add more searchable fields as needed
-      (alert.timestamp && moment(alert.timestamp).format("DD/MMM/YYYY").toLowerCase().includes(lowercasedSearch))
-    );
-  }, [alerts, searchTerm]);
-
-  // Handler for search input
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
-
+  // Get unique alert types
   const alertTypes = useMemo(() => {
     if (!alerts) return [];
     const types = [...new Set(alerts.map(alert => alert.type))];
     return ["all", ...types];
   }, [alerts]);
 
-  // Function to sort and filter alerts
-  const getFilteredAndSortedAlerts = () => {
+  // Combined filtering function incorporating search and type filters
+  const filteredAlerts = useMemo(() => {
     if (!alerts) return [];
-
+    
     let filtered = [...alerts];
     
     // Apply type filter
     if (selectedType !== "all") {
       filtered = filtered.filter(alert => alert.type === selectedType);
     }
-  }
 
-  // Function to sort alerts based on timestamp
-  const getSortedAlerts = () => {
-    if (!alerts) return [];
+    // Apply search filter if there's a search term
+    if (searchTerm) {
+      const lowercasedSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(alert => 
+        (alert.location?.city && alert.location.city.toLowerCase().includes(lowercasedSearch)) ||
+        (alert.location?.state && alert.location.state.toLowerCase().includes(lowercasedSearch)) ||
+        (alert.type && alert.type.toLowerCase().includes(lowercasedSearch)) ||
+        (alert.timestamp && moment(alert.timestamp).format("DD/MMM/YYYY").toLowerCase().includes(lowercasedSearch))
+      );
+    }
 
-    return [...alerts].sort((a, b) => {
+    // Apply sorting
+    return filtered.sort((a, b) => {
       const dateA = new Date(a.timestamp).getTime();
       const dateB = new Date(b.timestamp).getTime();
       return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
+  }, [alerts, selectedType, searchTerm, sortOrder]);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
-  const sortedAlerts = getSortedAlerts();
-
-  // Dropdown options
   const sortOptions = [
     {
       value: "newest",
@@ -86,13 +69,6 @@ const Dashboard = ({ alerts }) => {
 
   return (
     <div className="p-6">
-      {/* Previous Alert Overview Section Remains Same */}
-      <section id="AlertOverview">
-        {/* ... (previous alert overview code) ... */}
-      </section>
-
-      <hr />
-
       <section
         id="latestReport"
         className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4"
@@ -119,9 +95,7 @@ const Dashboard = ({ alerts }) => {
                   </div>
                 </div>
 
-                {/* Search and Filters Section */}
                 <div className="flex items-center space-x-4">
-                  {/* Search Input */}
                   <div className="relative w-96 mr-4">
                     <input
                       type="text"
@@ -146,7 +120,6 @@ const Dashboard = ({ alerts }) => {
                     </svg>
                   </div>
 
-                  {/* View Toggle Buttons */}
                   <div className="flex border border-gray-200 rounded-lg overflow-hidden">
                     <button
                       onClick={() => setViewMode("scroll")}
@@ -216,7 +189,6 @@ const Dashboard = ({ alerts }) => {
                       />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {isDropdownOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-10">
                         {sortOptions.map((option) => (
@@ -239,17 +211,15 @@ const Dashboard = ({ alerts }) => {
                       </div>
                     )}
                   </div>
-                </div>
-                
-                 {/* Type Filter */}
-                 <div className="flex items-center space-x-4">
+
+                  {/* Type Filter */}
+                  <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium text-gray-500">Filter by Type:</span>
                     <div className="relative">
                       <button
                         onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
                         className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                       >
-                        {/* <Filter className="h-4 w-4 text-gray-500" /> */}
                         <span className="text-sm text-gray-700 capitalize">
                           {selectedType === "all" ? "All Types" : selectedType}
                         </span>
@@ -280,6 +250,7 @@ const Dashboard = ({ alerts }) => {
                       )}
                     </div>
                   </div>
+                </div>
 
                 <div className="text-sm text-gray-500">
                   Total Reports:{" "}
@@ -292,7 +263,7 @@ const Dashboard = ({ alerts }) => {
 
             {/* Main Content with View Mode */}
             <div className="p-6 bg-gray-50">
-              {sortedAlerts.length === 0 ? (
+              {filteredAlerts.length === 0 ? (
                 <div className="text-center py-16 bg-white rounded-2xl shadow-inner">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -312,11 +283,15 @@ const Dashboard = ({ alerts }) => {
                     No Reports Found
                   </h3>
                   <p className="text-gray-400">
-                    There are currently no active alerts or reports to display.
+                    {searchTerm
+                      ? "No reports match your search criteria."
+                      : selectedType === "all"
+                      ? "There are currently no active alerts or reports to display."
+                      : `There are no alerts of type "${selectedType}" to display.`}
                   </p>
                 </div>
               ) : (
-                <CardComponent data={sortedAlerts} viewMode={viewMode} />
+                <CardComponent data={filteredAlerts} viewMode={viewMode} />
               )}
             </div>
           </div>
