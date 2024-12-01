@@ -146,7 +146,7 @@ const Dashboard = ({ alerts }) => {
                 Recent Alerts
               </h1>
               <div className="marquee overflow-hidden">
-                <div className="alerts-container animate-marquee flex space-x-4 shadow-xl">
+                <div className="alerts-container  flex space-x-4 shadow-xl">
                   {alerts.map((alert, index) => (
                     <div
                       key={index}
