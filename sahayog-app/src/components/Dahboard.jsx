@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import "../css/Dashboard.css";
-import PieChart from "./PieChart";
 import CardComponent from "./CardComponent";
 import moment from "moment";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
@@ -15,33 +14,39 @@ const Dashboard = ({ alerts }) => {
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-
   // Get unique alert types
   const alertTypes = useMemo(() => {
     if (!alerts) return [];
-    const types = [...new Set(alerts.map(alert => alert.type))];
+    const types = [...new Set(alerts.map((alert) => alert.type))];
     return ["all", ...types];
   }, [alerts]);
 
   // Combined filtering function incorporating search and type filters
   const filteredAlerts = useMemo(() => {
     if (!alerts) return [];
-    
+
     let filtered = [...alerts];
-    
+
     // Apply type filter
     if (selectedType !== "all") {
-      filtered = filtered.filter(alert => alert.type === selectedType);
+      filtered = filtered.filter((alert) => alert.type === selectedType);
     }
 
     // Apply search filter if there's a search term
     if (searchTerm) {
       const lowercasedSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter(alert => 
-        (alert.location?.city && alert.location.city.toLowerCase().includes(lowercasedSearch)) ||
-        (alert.location?.state && alert.location.state.toLowerCase().includes(lowercasedSearch)) ||
-        (alert.type && alert.type.toLowerCase().includes(lowercasedSearch)) ||
-        (alert.timestamp && moment(alert.timestamp).format("DD/MMM/YYYY").toLowerCase().includes(lowercasedSearch))
+      filtered = filtered.filter(
+        (alert) =>
+          (alert.location?.city &&
+            alert.location.city.toLowerCase().includes(lowercasedSearch)) ||
+          (alert.location?.state &&
+            alert.location.state.toLowerCase().includes(lowercasedSearch)) ||
+          (alert.type && alert.type.toLowerCase().includes(lowercasedSearch)) ||
+          (alert.timestamp &&
+            moment(alert.timestamp)
+              .format("DD/MMM/YYYY")
+              .toLowerCase()
+              .includes(lowercasedSearch))
       );
     }
 
@@ -71,9 +76,12 @@ const Dashboard = ({ alerts }) => {
   ];
 
   return (
-    <div className="p-6">
-
-<section id="AlertOverview">
+    <div className="p-0">
+      <section
+        id="AlertOverview"
+        style={{ backgroundColor: "#ebf4fe" }}
+        className="p-4"
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-xl font-bold">Alert Overview</h1>
@@ -107,10 +115,8 @@ const Dashboard = ({ alerts }) => {
               </div>
             </div>
 
-            
-
             {/* Recent Alerts */}
-            <div className="recent-alerts mb-4 mt-4">
+            {/* <div className="recent-alerts mb-4 mt-4">
               <h1 className="text-xl font-semibold mb-4">Recent Alerts</h1>
               <div className="marquee">
                 <div className="alerts-container">
@@ -134,21 +140,57 @@ const Dashboard = ({ alerts }) => {
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* PieChart Section */}
-          <div className="w-[20%]">
-            <div>
-              <PieChart />
+            </div> */}
+            <div className="recent-alerts-container p-6 bg-white rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm">
+              <h1 className="text-2xl font-bold mb-4 text-blue-700 border-b border-white/20 pb-2">
+                Recent Alerts
+              </h1>
+              <div className="marquee overflow-hidden">
+                <div className="alerts-container animate-marquee flex space-x-4 shadow-xl">
+                  {alerts.map((alert, index) => (
+                    <div
+                      key={index}
+                      className={`alert-item 
+                ${alert.color ? "bg-orange-900/80" : "bg-blue-700/80"} 
+                rounded-lg 
+                p-3 
+                min-w-[250px] 
+                transform 
+                transition-all 
+                shadow-xl
+                hover:scale-105 
+                hover:shadow-xl`}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="font-semibold text-white/90 truncate">
+                          {alert.location?.city}, {alert.location?.state}
+                        </p>
+                        <span
+                          className={`
+                  px-2 
+                  py-1 
+                  rounded-full 
+                  text-xs 
+                  ${alert.color ? "bg-orange-600" : "bg-blue-500"}
+                  text-white`}
+                        >
+                          {alert?.type}
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/70">
+                        {moment(alert?.timestamp).format("h:mm A")}{" "}
+                        {moment(alert?.timestamp).format("DD/MMM/YYYY")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <hr />
-
-
 
       <section
         id="latestReport"
@@ -295,18 +337,24 @@ const Dashboard = ({ alerts }) => {
 
                   {/* Type Filter */}
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm font-medium text-gray-500">Filter by Type:</span>
+                    <span className="text-sm font-medium text-gray-500">
+                      Filter by Type:
+                    </span>
                     <div className="relative">
                       <button
-                        onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                        onClick={() =>
+                          setIsTypeDropdownOpen(!isTypeDropdownOpen)
+                        }
                         className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                       >
                         <span className="text-sm text-gray-700 capitalize">
                           {selectedType === "all" ? "All Types" : selectedType}
                         </span>
-                        <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
-                          isTypeDropdownOpen ? "transform rotate-180" : ""
-                        }`} />
+                        <ChevronDown
+                          className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+                            isTypeDropdownOpen ? "transform rotate-180" : ""
+                          }`}
+                        />
                       </button>
 
                       {isTypeDropdownOpen && (
@@ -324,7 +372,9 @@ const Dashboard = ({ alerts }) => {
                                   : "text-gray-700 hover:bg-gray-50"
                               }`}
                             >
-                              <span className="ml-2">{type === "all" ? "All Types" : type}</span>
+                              <span className="ml-2">
+                                {type === "all" ? "All Types" : type}
+                              </span>
                             </button>
                           ))}
                         </div>
