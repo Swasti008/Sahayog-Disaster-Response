@@ -116,45 +116,20 @@ const Dashboard = ({ alerts }) => {
             </div>
 
             {/* Recent Alerts */}
-            {/* <div className="recent-alerts mb-4 mt-4">
-              <h1 className="text-xl font-semibold mb-4">Recent Alerts</h1>
-              <div className="marquee">
-                <div className="alerts-container">
-                  {alerts.map((alert, index) => (
-                    <div
-                      className={`alert-item ${
-                        alert.color ? "bg-orange-800" : "bg-blue-600"
-                      }`}
-                      key={index}
-                    >
-                      <p className="location w-[full] overflow-hidden text-ellipsis whitespace-nowrap">
-                        {alert.location?.city} {alert.location?.state}
-                      </p>
-
-                      <p className="">{alert?.type}</p>
-                      <p className="text-xs text-gray-300">
-                        {moment(alert?.timestamp).format("h:mm A")}{" "}
-                        {moment(alert?.timestamp).format("DD/MMM/YYYY")}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div> */}
             <div className="recent-alerts-container p-6 bg-white rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm">
               <h1 className="text-2xl font-bold mb-4 text-blue-700 border-b border-white/20 pb-2">
                 Recent Alerts
               </h1>
               <div className="marquee overflow-hidden">
-                <div className="alerts-container  flex space-x-4 shadow-xl">
+                <div className="alerts-container flex gap-6 space-x-4 shadow-xl">
                   {alerts.map((alert, index) => (
                     <div
                       key={index}
                       className={`alert-item 
                 ${alert.color ? "bg-orange-900/80" : "bg-blue-700/80"} 
                 rounded-lg 
-                p-3 
-                min-w-[250px] 
+                p-4 
+                min-w-[300px] 
                 transform 
                 transition-all 
                 shadow-xl
@@ -165,22 +140,24 @@ const Dashboard = ({ alerts }) => {
                         <p className="font-semibold text-white/90 truncate">
                           {alert.location?.city}, {alert.location?.state}
                         </p>
-                        <span
-                          className={`
-                  px-2 
-                  py-1 
-                  rounded-full 
-                  text-xs 
-                  ${alert.color ? "bg-orange-600" : "bg-blue-500"}
-                  text-white`}
-                        >
-                          {alert?.type}
-                        </span>
+                        
                       </div>
-                      <p className="text-xs text-white/70">
+                      <p className="text-xs text-white/70 flex justify-between">
                         {moment(alert?.timestamp).format("h:mm A")}{" "}
                         {moment(alert?.timestamp).format("DD/MMM/YYYY")}
+                        <div
+                          className={`
+                          px-2 
+                          py-1 
+                          rounded-full 
+                          text-xs 
+                          ${alert.color ? "bg-orange-600" : "bg-blue-400"}
+                          text-white`}
+                        >
+                          {alert?.type}
+                        </div>
                       </p>
+                      
                     </div>
                   ))}
                 </div>
