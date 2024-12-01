@@ -166,9 +166,7 @@ const Dashboard = ({ alerts }) => {
           </div>
         </div>
       </section>
-
-      <hr />
-
+      
       <section
         id="latestReport"
         className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4"
