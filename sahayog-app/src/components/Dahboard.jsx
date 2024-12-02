@@ -169,9 +169,9 @@ const Dashboard = ({ alerts }) => {
       
       <section
         id="latestReport"
-        className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4"
+        className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-6 px-4"
       >
-        <div className="container mx-auto max-w-6xl">
+        <div className="container mx-auto w-6xl">
           <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden relative">
             {/* Decorative Gradient */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
