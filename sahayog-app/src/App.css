@@ -2,3 +2,70 @@
     margin: 0%;
     padding: 0%;
 }
+/* 
+::-webkit-scrollbar {
+    width: 5px;
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a92db55;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #68c7ed;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5287dd;
+} */
+
+@keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .animate-marquee {
+    display: inline-flex;
+    animation: marquee 20s linear infinite;
+  }
+  
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  .navbar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    z-index: 1000; /* Ensures navbar stays on top */
+    border-radius: 100px;
+    width: 60%; /* Adjust the width as needed */
+    margin: 0 auto; /* Center the navbar horizontally */
+  }
+  
+.navbar-container {
+  display: flex;
+  justify-content: center;  /* Centers the items */
+  align-items: center;
+}
+.navbar-item {
+  font-size: 16px;
+  font-weight: normal;
+  text-decoration: none;
+  padding: 10px 20px;
+  margin: 0 15px;
+  color: #333;
+  transition: background-color 0.3s ease;
+}
+.navbar-item:hover {
+  background-color: #f0f0f0;
+}

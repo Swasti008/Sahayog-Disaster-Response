@@ -10,7 +10,7 @@ import {
 import Sidebar, { SidebarItem } from "../components/SideNav";
 import Dashboard from "../components/Dahboard";
 import InteractiveMap from "../components/InterativeMap";
-import { Home, Bell, MapPin, ClipboardPenLine } from "lucide-react";
+import { Home, Bell, MapPin, ClipboardPenLine, LayoutDashboard } from "lucide-react";
 import { Typography } from "@mui/material";
 import io from "socket.io-client";
 import FetchData from "../components/services/FetchData";
@@ -75,7 +75,6 @@ const MainDash = () => {
       <div className="flex flex-col">
         <div className="flex flex-1">
           <Sidebar className="w-64 bg-gray-200 shadow-2xl">
-
             <Link to="/">
               <SidebarItem
                 icon={<Home size={20} />}
@@ -88,7 +87,7 @@ const MainDash = () => {
 
             <Link to="/dashboard">
               <SidebarItem
-                icon={<Home size={20} />}
+                icon={<LayoutDashboard size={20} />}
                 text="Dashboard"
                 active={activeItem === "dashboard"}
                 alert={false}
@@ -99,7 +98,7 @@ const MainDash = () => {
             <Link to="/dashboard/reports">
               <SidebarItem
                 icon={<ClipboardPenLine size={20} />}
-                text="Detailed Reports"
+                text="Track Reports"
                 active={activeItem === "detailed"}
                 alert={false}
                 onClick={() => setActiveItem("detailed")}
@@ -129,7 +128,7 @@ const MainDash = () => {
 
           {/* Main content */}
           <main
-            className="flex-1 p- bg-gray-100 w-[60%]"
+            className="flex-1 p- bg-gray-100 w-[100%]"
             style={{ height: "calc(100vh - 0px)", overflowY: "scroll" }}
           >
             <Routes>
@@ -146,7 +145,7 @@ const MainDash = () => {
                   </>
                 }
               />
-              <Route path="/dashboard/reports" element={<DetailedReports />} />
+              <Route path="/reports" element={<DetailedReports />} />
             </Routes>
           </main>
         </div>
