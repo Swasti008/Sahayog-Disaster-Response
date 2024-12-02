@@ -3,8 +3,6 @@ import "../css/Dashboard.css";
 import CardComponent from "./CardComponent";
 import moment from "moment";
 import { ChevronDown, ChevronUp, Clock } from "lucide-react";
-import { useEffect } from "react";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 
 const Dashboard = ({ alerts }) => {
   const [viewMode, setViewMode] = useState("scroll");
@@ -14,25 +12,21 @@ const Dashboard = ({ alerts }) => {
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Get unique alert types
   const alertTypes = useMemo(() => {
     if (!alerts) return [];
     const types = [...new Set(alerts.map((alert) => alert.type))];
     return ["all", ...types];
   }, [alerts]);
 
-  // Combined filtering function incorporating search and type filters
   const filteredAlerts = useMemo(() => {
     if (!alerts) return [];
 
     let filtered = [...alerts];
 
-    // Apply type filter
     if (selectedType !== "all") {
       filtered = filtered.filter((alert) => alert.type === selectedType);
     }
 
-    // Apply search filter if there's a search term
     if (searchTerm) {
       const lowercasedSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(
