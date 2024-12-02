@@ -16,6 +16,7 @@ import { Badge } from "flowbite-react";
 import { HiClock } from "react-icons/hi";
 import { LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Header from "./Header";
 
 const socket = io("http://localhost:3000");
 
@@ -92,32 +93,9 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Top banner */}
-
-      {/* Main navbar */}
-      <nav className="bg-blue-600 text-white p-4 ">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex text-2xl font-bold items-center">
-            <img src={Logo} className="h-16" />
-            सहयोग NATIONAL DISASTER ALERT PORTAL
-          </div>
-          <div className="space-x-4">
-            <Button variant="ghost" className="text-white">
-              HOME
-            </Button>
-            <Button variant="ghost" className="text-white">
-              ABOUT
-            </Button>
-            <Button variant="ghost" className="text-white">
-              CONTACT
-            </Button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Floating Navbar */}
-      <nav className="navbar">
+    <div className="min-h-screen" style={{backgroundColor: "#dbeafe"}}>
+      <Header/>
+      <nav className="navbar mt-4 mb-4">
       <div className="navbar-container">
         <a href="/" className="navbar-item">Home</a>
         <a href="/about" className="navbar-item">About</a>
@@ -126,8 +104,6 @@ export default function Home() {
       </div>
     </nav>
 
-
-      {/* Recent earthquakes ticker */}
       <div className="bg- text-white p-2 overflow-hidden">
         <div className="animate-marquee whitespace-nowrap flex space-x-8 items-center">
           <div className="flex items-center space-x-2 bg-red-600 px-4 py-1 rounded-full">
@@ -158,8 +134,6 @@ export default function Home() {
           <div className="col-span-2">
             <Card className="bg-white shadow h-128">
               <CardContent className="p-4">
-                <h2 className="text-xl font-bold mb-4">Interactive Map</h2>
-                {/* Placeholder for the interactive map */}
                 <div className="bg-gray-200 h-144 flex">
                   <InteractiveMap disasters={alerts} />
                 </div>

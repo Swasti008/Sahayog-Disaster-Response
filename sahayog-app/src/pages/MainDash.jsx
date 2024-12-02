@@ -137,10 +137,6 @@ const MainDash = () => {
                 path="/map"
                 element={
                   <>
-                    <div className="px-4 py-5">
-                      <Typography variant="h5">Map Overview</Typography>
-                      <hr />
-                    </div>
                     <InteractiveMap disasters={alerts} />
                   </>
                 }
