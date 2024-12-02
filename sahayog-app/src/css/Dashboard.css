@@ -142,3 +142,25 @@
   overflow: hidden; /* Disable internal scrolling initially */
   transition: max-height 0.3s ease;
 }
+
+#AlertOverview .relative {
+  overflow: hidden;
+  white-space: nowrap; 
+  background-color: #e43434; 
+}
+
+#AlertOverview .collapsed {
+  box-shadow: 3px 2px 4px rgba(255, 116, 116, 0.621);
+}
+
+#AlertOverview .expanded {
+  box-shadow: 4px 4px 5px rgba(255, 110, 110, 0.579);
+}
+
+#AlertOverview .transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+#AlertOverview .rounded-xl {
+  border-radius: 0.75rem;
+}

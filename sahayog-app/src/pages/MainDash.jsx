@@ -1,20 +1,28 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Link, useLocation } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Sidebar, { SidebarItem } from "../components/SideNav";
 import Dashboard from "../components/Dahboard";
 import InteractiveMap from "../components/InterativeMap";
-import { Home, Bell, MapPin, User } from "lucide-react";
+import { Home, Bell, MapPin, ClipboardPenLine } from "lucide-react";
 import { Typography } from "@mui/material";
 import io from "socket.io-client";
 import FetchData from "../components/services/FetchData";
+import DetailedReports from "../components/DetailedReports";
 
-const socket = io("http://localhost:3000"); // Connect to the server
+const socket = io("http://localhost:3000");
 
 const MainDash = () => {
   const [alerts, setAlerts] = useState([]);
-  const [activeItem, setActiveItem] = useState("dashboard"); // Track active sidebar item
-  const location = useLocation(); // To track route changes
+  const [activeItem, setActiveItem] = useState("dashboard"); 
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,19 +32,16 @@ const MainDash = () => {
 
     fetchData();
 
-    // Listen for the 'newEntry' event from the server
     socket.on("newEntry", (data) => {
       console.log("Received new entry: ", data);
-      setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]); // Add the new alert to the top
+      setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]); 
     });
 
-    // Cleanup the effect when the component unmounts
     return () => {
       socket.off("newEntry");
     };
   }, []);
 
-  // Set active item based on route change
   useEffect(() => {
     if (location.pathname === "/dashboard") {
       setActiveItem("dashboard");
@@ -47,16 +52,29 @@ const MainDash = () => {
     } else if (location.pathname === "/dashboard/profile") {
       setActiveItem("profile");
     } else if (location.pathname == "/") {
-      setActiveItem("home")
+      setActiveItem("home");
+    } else if (location.pathname == "/dashboard/reports") {
+      setActiveItem("detailed");
     }
   }, [location]);
+
+  const handleAlertsClick = () => {
+    if (location.pathname !== "/dashboard") {
+      navigate("/dashboard"); 
+    }
+    setTimeout(() => {
+      const reportElement = document.querySelector("#latestReport");
+      if (reportElement) {
+        reportElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100); 
+  };
 
   return (
     <>
       <div className="flex flex-col">
         <div className="flex flex-1">
           <Sidebar className="w-64 bg-gray-200 shadow-2xl">
-            {/* Dashboard Sidebar Item */}
 
             <Link to="/">
               <SidebarItem
@@ -78,14 +96,17 @@ const MainDash = () => {
               />
             </Link>
 
-            {/* Alerts Sidebar Item */}
-            <a
-              href="#latestReport"
-              onClick={(e) => {
-                e.preventDefault();
-                document.querySelector("#latestReport").scrollIntoView({ behavior: "smooth" });
-              }}
-            >
+            <Link to="/dashboard/reports">
+              <SidebarItem
+                icon={<ClipboardPenLine size={20} />}
+                text="Detailed Reports"
+                active={activeItem === "detailed"}
+                alert={false}
+                onClick={() => setActiveItem("detailed")}
+              />
+            </Link>
+
+            <button onClick={handleAlertsClick} className="w-full text-left">
               <SidebarItem
                 icon={<Bell size={24} />}
                 text="Alerts"
@@ -93,9 +114,8 @@ const MainDash = () => {
                 alert={true}
                 onClick={() => setActiveItem("alerts")}
               />
-            </a>
+            </button>
 
-            {/* Map Overview Sidebar Item */}
             <Link to="/dashboard/map">
               <SidebarItem
                 icon={<MapPin size={20} />}
@@ -126,6 +146,7 @@ const MainDash = () => {
                   </>
                 }
               />
+              <Route path="/dashboard/reports" element={<DetailedReports />} />
             </Routes>
           </main>
         </div>
