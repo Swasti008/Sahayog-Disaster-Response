@@ -86,21 +86,21 @@ const Dashboard = ({ alerts }) => {
           <div className="flex-1 w-[20%]">
             {/* Alert Overview */}
             <div className="flex flex-row items-start gap-8 mb-4">
-              <div className="text-red-600 font-bold bg-red-100 p-6 rounded-lg shadow-lg w-64">
+              <div className="text-red-600 font-bold bg-red-100 p-6 rounded-lg shadow-xl w-64 border border-red-300">
                 <span className="flex items-center gap-3">
                   <div className="bg-red-500 h-2 w-2 rounded-full"></div>
                   <h2 className="text-lg font-semibold">Critical Alerts</h2>
                 </span>
                 <p className="text-xl"> &nbsp; &nbsp; 2</p>
               </div>
-              <div className="text-yellow-600 font-bold bg-orange-100 p-6 rounded-lg shadow-lg w-64">
+              <div className="text-yellow-600 font-bold bg-orange-100 p-6 rounded-lg shadow-xl w-64 border border-orange-300">
                 <span className="flex gap-3 items-center">
                   <div className="bg-yellow-500 rounded-full h-2 w-2"></div>
                   <h2 className="text-lg font-semibold">Moderate Alerts</h2>
                 </span>
                 <p className="text-xl"> &nbsp; &nbsp; 5</p>
               </div>
-              <div className="text-green-500 font-bold bg-green-100 p-6 rounded-lg shadow-lg w-64">
+              <div className="text-green-500 font-bold bg-green-100 p-6 rounded-lg shadow-xl w-64 border border-green-400">
                 <span className="flex items-center gap-4">
                   <div className="bg-green-500 rounded-full h-2 w-2"></div>
                   <h2 className="text-lg font-semibold">Low Alerts</h2>
@@ -110,7 +110,7 @@ const Dashboard = ({ alerts }) => {
             </div>
 
             {/* Recent Alerts */}
-            <div className="recent-alerts-container p-6 bg-white rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm">
+            <div className="recent-alerts-container mt-8 p-6 bg-white rounded-2xl border border-white/20 shadow-lg backdrop-blur-sm">
               <h1 className="text-2xl font-bold mb-4 text-blue-700 border-b border-white/20 pb-2">
                 Recent Alerts
               </h1>
