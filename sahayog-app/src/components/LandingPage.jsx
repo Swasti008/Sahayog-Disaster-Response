@@ -1,7 +1,24 @@
 import React from "react";
-import { Button, Fab, Box, colors } from "@mui/material";
-import { Card, CardContent, Typography } from "@mui/material";
-import { MapPin, AlertTriangle, Globe, CloudRain, Shield } from "lucide-react"; // Assuming you want to use Shield for features
+import {
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+} from "@mui/material";
+import {
+  MapPin,
+  AlertTriangle,
+  Globe,
+  CloudRain,
+  Shield,
+  LayoutDashboard,
+  Languages,
+} from "lucide-react"; // Assuming you want to use Shield for features
 import InteractiveMap from "./InterativeMap";
 import { Link } from "react-router-dom";
 import End from "./End";
@@ -14,9 +31,9 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import WaterOutlinedIcon from "@mui/icons-material/WaterOutlined";
 import { Badge } from "flowbite-react";
 import { HiClock } from "react-icons/hi";
-import { LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
+import LoginDialog from "./LoginDialog";
 
 const socket = io("http://localhost:3000");
 
@@ -25,12 +42,13 @@ export default function Home() {
   const [isHovered, setIsHovered] = useState(false);
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
+  const [openLoginDialog, setOpenLoginDialog] = useState(false);
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
 
   const navigate = useNavigate();
-
-  const handleNavigation = () => {
-    navigate("/dashboard");
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,6 +110,55 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    const navbar = document.querySelector(".navbar");
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      if (window.scrollY > lastScrollY) {
+        // Scrolling down
+        navbar.style.transform = "translateY(0)";
+      } else {
+        // Scrolling up
+        navbar.style.transform = "translateY(-110%)";
+      }
+      lastScrollY = window.scrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleOpenLoginDialog = () => {
+    setOpenLoginDialog(true);
+  };
+
+  // Close the login dialog
+  const handleCloseLoginDialog = () => {
+    setOpenLoginDialog(false);
+    setCredentials({ username: "", password: "" });
+  };
+
+  // Handle the login form submission
+  const handleLogin = (credentials) => {
+    const { username, password } = credentials;
+
+    if (
+      username === "NDRFCOORDINATOR" &&
+      password === "PASSWORDNDRFCOORDINATOR"
+    ) {
+      handleCloseLoginDialog();
+      navigate("/dashboard");
+      return true; // Login successful
+    } else {
+      return false; // Login failed
+    }
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#dbeafe" }}>
       <Header />
@@ -100,9 +167,7 @@ export default function Home() {
           <a href="/" className="navbar-item">
             Home
           </a>
-          <a className="navbar-item">
-            About
-          </a>
+          <a className="navbar-item">About</a>
           <a href="/contact" className="navbar-item">
             Contact
           </a>
@@ -112,26 +177,43 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="bg- text-white p-2 overflow-hidden">
+      <div className="bg-gradient-to-r from-red-500 to-pink-600 text-white p-2 overflow-hidden">
         <div className="animate-marquee whitespace-nowrap flex space-x-8 items-center">
-          <div className="flex items-center space-x-2 bg-red-600 px-4 py-1 rounded-full">
-            <Globe className="text-yellow-300" size={16} />
-            <span className="text-sm">1.8 Magnitude</span>
-            <span className="text-xs text-blue-200">Chamoli, Uttarakhand</span>
-            <span className="text-xs text-blue-100">17 Sep 2024 22:25:05</span>
-          </div>
-          <div className="flex items-center space-x-2 bg-blue-600 px-4 py-1 rounded-full">
-            <AlertTriangle className="text-orange-300" size={16} />
-            <span className="text-sm">4.7 Magnitude</span>
-            <span className="text-xs text-blue-200">Tajikistan</span>
-            <span className="text-xs text-blue-100">17 Sep 2024 19:58:09</span>
-          </div>
-          <div className="flex items-center space-x-2 bg-purple-800 px-4 py-1 rounded-full">
-            <MapPin className="text-red-300" size={16} />
-            <span className="text-sm">3.3 Magnitude</span>
-            <span className="text-xs text-blue-200">Nepal</span>
-            <span className="text-xs text-blue-100">17 Sep 2024 16:45:30</span>
-          </div>
+          {[
+            {
+              icon: Globe,
+              color: "yellow-300",
+              magnitude: "1.8",
+              location: "Chamoli, Uttarakhand",
+              time: "17 Sep 2024 22:25:05",
+            },
+            {
+              icon: AlertTriangle,
+              color: "orange-300",
+              magnitude: "4.7",
+              location: "Tajikistan",
+              time: "17 Sep 2024 19:58:09",
+            },
+            {
+              icon: MapPin,
+              color: "red-300",
+              magnitude: "3.3",
+              location: "Nepal",
+              time: "17 Sep 2024 16:45:30",
+            },
+          ].map((disaster, index) => (
+            <div
+              key={index}
+              className="flex items-center space-x-2 bg-white/20 px-4 py-1 rounded-full"
+            >
+              <disaster.icon className={`text-${disaster.color}`} size={16} />
+              <span className="text-sm font-medium">
+                {disaster.magnitude} Magnitude
+              </span>
+              <span className="text-xs opacity-75">{disaster.location}</span>
+              <span className="text-xs opacity-50">{disaster.time}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -148,7 +230,7 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-          <div >
+          <div>
             <div className="alert-list-container mb-4">
               <div className="alert-list">
                 <div className="alert-box bg-red-500 text-white shadow-md">
@@ -217,7 +299,7 @@ export default function Home() {
 
         <div className="fixed bottom-8 right-8 z-50">
           <button
-            onClick={handleNavigation}
+            onClick={handleOpenLoginDialog}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             className={`
@@ -235,19 +317,11 @@ export default function Home() {
           >
             <div className="flex items-center space-x-3">
               <LayoutDashboard
-                className={`
-              text-white 
-              transition-transform duration-300`}
+                className={`text-white transition-transform duration-300`}
                 size={34}
               />
               {isHovered && (
-                <span
-                  className="
-                text-md font-medium 
-                whitespace-nowrap 
-                opacity-0 group-hover:opacity-100 
-                transition-opacity duration-300"
-                >
+                <span className="text-md font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   Go to Dashboard
                 </span>
               )}
@@ -255,57 +329,174 @@ export default function Home() {
           </button>
         </div>
 
+        {/* Login Dialog */}
+
+        <LoginDialog
+          open={openLoginDialog}
+          onClose={handleCloseLoginDialog}
+          onLogin={handleLogin}
+          credentials={credentials}
+          setCredentials={setCredentials}
+        />
+
         {/* Key Features Section */}
-        <section className="mt-16">
-          <hr></hr>
-          <h2 className="text-center text-2xl font-bold mb-8 mt-2">
-            Key Features
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <Card className="bg-white shadow p-6">
-              <CardContent className="text-center">
-                <Shield className="mx-auto mb-4" size={48} />
-                <h3 className="text-xl font-semibold mb-2">
-                  Real-Time Data Aggregation
-                </h3>
-                <p>
-                  Collects and analyzes data from various sources including
-                  social media, news outlets, and user reports for accurate
-                  disaster information.
-                </p>
-              </CardContent>
-            </Card>
+        <section className="mt-16 bg-gray-50 py-16">
+          <div className="container mx-auto px-4">
+            <hr className="border-t-2 border-blue-200 mb-8 w-24 mx-auto" />
+            <h2 className="text-center text-4xl font-extrabold mb-12 text-gray-800 tracking-tight">
+              Powerful Platform Features
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Feature 1 */}
+              <div className="group">
+                <Card
+                  className="
+        bg-white 
+        shadow-lg 
+        hover:shadow-2xl 
+        hover:scale-101 
+        transition-all 
+        duration-500 
+        ease-in-out 
+        border-t-4 
+        border-blue-500 
+        rounded-xl 
+        overflow-hidden
+      "
+                >
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className="
+          bg-blue-100 
+          text-blue-600 
+          rounded-full 
+          w-20 
+          h-20 
+          flex 
+          items-center 
+          justify-center 
+          mx-auto 
+          mb-6 
+          transform 
+          group-hover:rotate-12 
+          transition-transform 
+          duration-500
+        "
+                    >
+                      <Globe size={42} className="text-blue-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                      Real-Time Data Aggregation
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Collects and analyzes data from multiple sources including
+                      social media, news outlets, and user reports to provide
+                      accurate and timely disaster information.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Feature 2 */}
-            <Card className="bg-white shadow p-6">
-              <CardContent className="text-center">
-                <Shield className="mx-auto mb-4" size={48} />
-                <h3 className="text-xl font-semibold mb-2">
-                  Credibility Scoring System
-                </h3>
-                <p>
-                  Automatically assigns credibility scores to sources based on
-                  location, number of followers, and posting activity, ensuring
-                  reliable information.
-                </p>
-              </CardContent>
-            </Card>
+              {/* Feature 2 */}
+              <div className="group">
+                <Card
+                  className="
+        bg-white 
+        shadow-lg 
+        hover:shadow-2xl 
+        hover:scale-101 
+        transition-all 
+        duration-500 
+        ease-in-out 
+        border-t-4 
+        border-green-500 
+        rounded-xl 
+        overflow-hidden
+      "
+                >
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className="
+          bg-green-100 
+          text-green-600 
+          rounded-full 
+          w-20 
+          h-20 
+          flex 
+          items-center 
+          justify-center 
+          mx-auto 
+          mb-6 
+          transform 
+          group-hover:rotate-12 
+          transition-transform 
+          duration-500
+        "
+                    >
+                      <Languages size={42} className="text-green-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                      Multi-Language Support
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Seamlessly supports multiple languages for content and
+                      interface, enabling users from diverse regions to interact
+                      with the platform effectively and intuitively.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Feature 3 */}
-            <Card className="bg-white shadow p-6">
-              <CardContent className="text-center">
-                <Shield className="mx-auto mb-4" size={48} />
-                <h3 className="text-xl font-semibold mb-2">
-                  User-Friendly Dashboard
-                </h3>
-                <p>
-                  Provides disaster management agencies with a streamlined,
-                  easy-to-use dashboard for quick access to categorized reports
-                  and alerts.
-                </p>
-              </CardContent>
-            </Card>
+              {/* Feature 3 */}
+              <div className="group">
+                <Card
+                  className="
+        bg-white 
+        shadow-lg 
+        hover:shadow-2xl 
+        hover:scale-101 
+        transition-all 
+        duration-500 
+        ease-in-out 
+        border-t-4 
+        border-purple-500 
+        rounded-xl 
+        overflow-hidden
+      "
+                >
+                  <CardContent className="p-8 text-center">
+                    <div
+                      className="
+          bg-purple-100 
+          text-purple-600 
+          rounded-full 
+          w-20 
+          h-20 
+          flex 
+          items-center 
+          justify-center 
+          mx-auto 
+          mb-6 
+          transform 
+          group-hover:rotate-12 
+          transition-transform 
+          duration-500
+        "
+                    >
+                      <LayoutDashboard size={42} className="text-purple-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                      User-Friendly Dashboard
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed">
+                      Provides disaster management agencies with a streamlined,
+                      intuitive dashboard for rapid access to categorized
+                      reports, real-time alerts, and critical information.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </section>
       </main>
