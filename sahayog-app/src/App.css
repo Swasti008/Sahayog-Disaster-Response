@@ -39,33 +39,95 @@
   }
 
   .navbar {
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    background-color: #ffffff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background: #ffffff; /* Clean, solid white background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
     padding: 10px 20px;
     z-index: 1000; /* Ensures navbar stays on top */
-    border-radius: 100px;
-    width: 60%; /* Adjust the width as needed */
-    margin: 0 auto; /* Center the navbar horizontally */
+    border-radius: 50px; /* Soft round shape */
+    width: 50%; /* Slightly adjusted width */
+    margin: 0 auto; /* Centers and adds vertical spacing */
+    transition: transform 0.5s ease-in-out;
+    transform: translateY(-110%);
   }
   
-.navbar-container {
+  .navbar:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slight shadow enhancement on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+  }
+  
+  .navbar-container {
+    display: flex;
+    justify-content: space-between; /* Even spacing between items */
+    align-items: center;
+    gap: 15px; /* Reduced spacing between items */
+  }
+  
+  .navbar-item {
+    font-size: 15px; /* Moderate size for subtlety */
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px; /* Reduced padding for a cleaner look */
+    margin: 0 8px; /* Less margin for tighter spacing */
+    color: #333; /* Neutral, readable text color */
+    border-radius: 25px; /* Rounded link background */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .navbar-item:hover {
+    background-color: #f7f7f7; /* Light gray hover background */
+    color: #00796b; /* Teal for hover text color */
+  }
+  
+  .login-button {
+    font-weight: 600; /* Slightly bolder to differentiate */
+    background: #e0f7fa; /* Light teal for subtle emphasis */
+    color: #00574b; /* Deep teal text color */
+    padding: 8px 16px; /* Reduced padding for compactness */
+    border-radius: 25px; /* Rounded shape */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Light shadow */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  
+  .login-button:hover {
+    background: #b2ebf2; /* Slightly darker teal on hover */
+    transform: translateY(-1px); /* Minimal lift effect */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Slight shadow enhancement */
+  }
+  
+.alert-list-container {
+  height: 30vh; /* Adjust the height of the box */
+  width: 100%; /* Adjust the width if needed */
+  overflow: hidden; /* Hide overflow */
+  position: relative;
+  border: 2px solid #ccc; /* Optional: Add a border to make it look like a box */
+  border-radius: 8px; /* Optional: Rounded corners */
+  background-color: white; /* Optional: Background color */
+  padding: 12px; /* Adds padding inside the container */
+  box-sizing: border-box; /* Ensures padding doesn't affect height/width */
+}
+
+.alert-list {
   display: flex;
-  justify-content: center;  /* Centers the items */
-  align-items: center;
+  flex-direction: column;
+  animation: scroll-reverse 8s linear infinite;
 }
-.navbar-item {
-  font-size: 16px;
-  font-weight: normal;
-  text-decoration: none;
-  padding: 10px 20px;
-  margin: 0 15px;
-  color: #333;
-  transition: background-color 0.3s ease;
+
+@keyframes scroll-reverse {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
 }
-.navbar-item:hover {
-  background-color: #f0f0f0;
+
+.alert-box {
+  margin-bottom: 8px; /* Spacing between alerts */
+  padding: 8px; /* Padding inside each alert box */
+  border-radius: 4px; /* Optional: Rounded corners */
+  text-align: center; /* Center-align text */
 }

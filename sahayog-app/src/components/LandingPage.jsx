@@ -93,16 +93,24 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen" style={{backgroundColor: "#dbeafe"}}>
-      <Header/>
+    <div className="min-h-screen" style={{ backgroundColor: "#dbeafe" }}>
+      <Header />
       <nav className="navbar mt-4 mb-4">
-      <div className="navbar-container">
-        <a href="/" className="navbar-item">Home</a>
-        <a href="/about" className="navbar-item">About</a>
-        <a href="/contact" className="navbar-item">Contact</a>
-        <a href="/login" className="navbar-item login-button">Login</a>
-      </div>
-    </nav>
+        <div className="navbar-container">
+          <a href="/" className="navbar-item">
+            Home
+          </a>
+          <a className="navbar-item">
+            About
+          </a>
+          <a href="/contact" className="navbar-item">
+            Contact
+          </a>
+          <a href="/login" className="navbar-item login-button">
+            Login
+          </a>
+        </div>
+      </nav>
 
       <div className="bg- text-white p-2 overflow-hidden">
         <div className="animate-marquee whitespace-nowrap flex space-x-8 items-center">
@@ -140,33 +148,31 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-          <div>
-            <Card className="bg-white shadow mb-4">
-              <CardContent className="p-4">
-                <h2 className="text-xl font-bold mb-2">ALERT LIST</h2>
-                <div className="space-y-2 h-[30vh] overflow-y-scroll custom-scrollbar">
-                  <div className="alert-box bg-red-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Heavy Rain: Chhatarpur, Katni, Panna, Tikamgarh districts
-                  </div>
-                  <div className="alert-box bg-orange-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Moderate Thunderstorms: Bhind, Datia, Dindori, Harda
-                  </div>
-                  <div className="alert-box bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Light Thunderstorms: Agar-Malwa, Anuppur, Betul, Bhopal
-                  </div>
-                  <div className="alert-box bg-red-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Heavy Rain: Chhatarpur, Katni, Panna, Tikamgarh districts
-                  </div>
-                  <div className="alert-box bg-orange-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Moderate Thunderstorms: Bhind, Datia, Dindori, Harda
-                  </div>
-                  <div className="alert-box bg-yellow-500 text-white p-4 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                    Light Thunderstorms: Agar-Malwa, Anuppur, Betul, Bhopal
-                  </div>
+          <div >
+            <div className="alert-list-container mb-4">
+              <div className="alert-list">
+                <div className="alert-box bg-red-500 text-white shadow-md">
+                  Heavy Rain: Chhatarpur, Katni, Panna, Tikamgarh districts
                 </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-gradient-to-r from-blue-500 to-light-blue-400 text-white shadow-2xl rounded-lg h-60">
+                <div className="alert-box bg-orange-500 text-white shadow-md">
+                  Moderate Thunderstorms: Bhind, Datia, Dindori, Harda
+                </div>
+                <div className="alert-box bg-yellow-500 text-white shadow-md">
+                  Light Thunderstorms: Agar-Malwa, Anuppur, Betul, Bhopal
+                </div>
+                <div className="alert-box bg-red-500 text-white shadow-md">
+                  Heavy Rain: Chhatarpur, Katni, Panna, Tikamgarh districts
+                </div>
+                <div className="alert-box bg-orange-500 text-white shadow-md">
+                  Moderate Thunderstorms: Bhind, Datia, Dindori, Harda
+                </div>
+                <div className="alert-box bg-yellow-500 text-white shadow-md">
+                  Light Thunderstorms: Agar-Malwa, Anuppur, Betul, Bhopal
+                </div>
+              </div>
+            </div>
+
+            <Card className="bg-gradient-to-r from-blue-500 to-light-blue-400 text-white shadow-2xl rounded-lg h-64">
               <CardContent className="p-6 flex flex-col justify-between h-full">
                 <h2 className="text-2xl font-bold tracking-wide mb-2">
                   Weather Forecast
@@ -175,17 +181,15 @@ export default function Home() {
                   <div>
                     {weather ? (
                       <div>
-                      <p className="text-5xl text-white font-extrabold text-shadow-xl">
-                      {weather.temperature}°C
-                    </p>
-                    <p className="text-lg text-white">
-                      {weather.condition}
-                      <WaterOutlinedIcon className="ml-1 mb-1" />
-                    </p>
-                    <p className="text-sm text-white">
-                      {weather.location}
-                    </p>
-                    </div>
+                        <p className="text-5xl text-white font-extrabold text-shadow-xl">
+                          {weather.temperature}°C
+                        </p>
+                        <p className="text-lg text-white">
+                          {weather.condition}
+                          <WaterOutlinedIcon className="ml-1 mb-1" />
+                        </p>
+                        <p className="text-sm text-white">{weather.location}</p>
+                      </div>
                     ) : (
                       <p>{error || "Fetching weather..."}</p>
                     )}
@@ -234,7 +238,7 @@ export default function Home() {
                 className={`
               text-white 
               transition-transform duration-300`}
-              size={34}
+                size={34}
               />
               {isHovered && (
                 <span
