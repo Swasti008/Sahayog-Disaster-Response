@@ -51,19 +51,24 @@ router.get("/getDataByLocation", async (req, res) => {
 
     const stateWiseData = await collection.find({
       state: state,
-      "districts.district_name": district,
+      "districts.name": district,
     }).toArray();
 
     if (stateWiseData.length === 0) {
       return res.status(404).json({ error: "No data found for the specified state and district" });
     }
+    const districtData = stateWiseData[0].districts.find(d => d.name === district);
 
-    res.status(200).json(stateWiseData);
+    if (!districtData) {
+      return res.status(404).json({ error: "District data not found" });
+    }
+    res.status(200).json({ state: state, district: districtData });
   } catch (error) {
     console.error("Error fetching data by location:", error);
     res.status(500).json({ error: "Failed to fetch data by location" });
   }
 });
+
 
 
 export default router;
