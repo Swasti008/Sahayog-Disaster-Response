@@ -133,7 +133,7 @@ export default function Home() {
 
         const locationData = await fetchLocationDetails(latitude, longitude);
 
-        console.log("Location Details in Weather Fetch:", locationData);
+        // console.log("Location Details in Weather Fetch:", locationData);
 
         setWeather({
           temperature: weatherData.main.temp,
