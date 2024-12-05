@@ -2,3 +2,136 @@
     margin: 0%;
     padding: 0%;
 }
+/* 
+::-webkit-scrollbar {
+    width: 5px;
+    display: none;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a92db55;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #68c7ed;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5287dd;
+} */
+
+@keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  .animate-marquee {
+    display: inline-flex;
+    animation: marquee 20s linear infinite;
+  }
+  
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff; /* Clean, solid white background */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    padding: 10px 20px;
+    z-index: 1000; /* Ensures navbar stays on top */
+    border-radius: 50px; /* Soft round shape */
+    width: 50%; /* Slightly adjusted width */
+    margin: 0 auto; /* Centers and adds vertical spacing */
+    transition: transform 0.3s ease-in-out; /* Smooth transition */
+    transform: translateY(-110%); /* Hidden by default */
+  }  
+  
+  .navbar:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Slight shadow enhancement on hover */
+    transform: translateY(-2px); /* Subtle lift effect */
+  }
+  
+  .navbar-container {
+    display: flex;
+    justify-content: space-between; /* Even spacing between items */
+    align-items: center;
+    gap: 15px; /* Reduced spacing between items */
+  }
+  
+  .navbar-item {
+    font-size: 15px; /* Moderate size for subtlety */
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px; /* Reduced padding for a cleaner look */
+    margin: 0 8px; /* Less margin for tighter spacing */
+    color: #333; /* Neutral, readable text color */
+    border-radius: 25px; /* Rounded link background */
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .navbar-item:hover {
+    background-color: #f7f7f7; /* Light gray hover background */
+    color: #00796b; /* Teal for hover text color */
+  }
+  
+  .login-button {
+    font-weight: 600; /* Slightly bolder to differentiate */
+    background: #e0f7fa; /* Light teal for subtle emphasis */
+    color: #00574b; /* Deep teal text color */
+    padding: 8px 16px; /* Reduced padding for compactness */
+    border-radius: 25px; /* Rounded shape */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Light shadow */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  
+  .login-button:hover {
+    background: #b2ebf2; /* Slightly darker teal on hover */
+    transform: translateY(-1px); /* Minimal lift effect */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Slight shadow enhancement */
+  }
+  
+.alert-list-container {
+  height: 30vh; /* Adjust the height of the box */
+  width: 100%; /* Adjust the width if needed */
+  overflow: hidden; /* Hide overflow */
+  position: relative;
+  border: 2px solid #ccc; /* Optional: Add a border to make it look like a box */
+  border-radius: 8px; /* Optional: Rounded corners */
+  background-color: white; /* Optional: Background color */
+  padding: 12px; /* Adds padding inside the container */
+  box-sizing: border-box; /* Ensures padding doesn't affect height/width */
+}
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  animation: scroll-reverse 8s linear infinite;
+}
+
+@keyframes scroll-reverse {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.alert-list:hover {
+  animation-play-state: paused;
+}
+
+.alert-box {
+  margin-bottom: 8px; /* Spacing between alerts */
+  padding: 8px; /* Padding inside each alert box */
+  border-radius: 4px; /* Optional: Rounded corners */
+  text-align: center; /* Center-align text */
+}
