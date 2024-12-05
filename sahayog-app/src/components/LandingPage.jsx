@@ -1,15 +1,6 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-} from "@mui/material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Card, CardContent } from "@mui/material";
+import { Phone, X } from "lucide-react";
 import {
   MapPin,
   AlertTriangle,
@@ -18,7 +9,8 @@ import {
   Shield,
   LayoutDashboard,
   Languages,
-} from "lucide-react"; // Assuming you want to use Shield for features
+  Hospital
+} from "lucide-react"; 
 import InteractiveMap from "./InterativeMap";
 import { Link } from "react-router-dom";
 import End from "./End";
@@ -34,6 +26,10 @@ import { HiClock } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import LoginDialog from "./LoginDialog";
+import { Tooltip } from '@mui/material';
+import EmergencyContacts from "./EmergencyContacts"
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import KeyFeatures from "./KeyFeatures";
 
 const socket = io("http://localhost:3000");
 
@@ -47,8 +43,56 @@ export default function Home() {
     username: "",
     password: "",
   });
+  const [isContactHovered, setIsContactHovered] = useState(false);
+  const [openContactsDialog, setOpenContactsDialog] = useState(false);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState(new Date());
+
+  const formatLastUpdatedTime = (date) => {
+    return date.toLocaleString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const [selectedDistrict, setSelectedDistrict] = useState('Shimla');
+
+
+  const handleOpenContactsDialog = () => {
+    setOpenContactsDialog(true);
+  };
+
+  const handleCloseContactsDialog = () => {
+    setOpenContactsDialog(false);
+  };
+
 
   const navigate = useNavigate();
+
+  const fetchLocationDetails = async (lat, lon) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Location details fetch failed');
+      }
+
+      const data = await response.json();
+      return {
+        state: data.address.state || data.address.region || 'Unknown',
+        country: data.address.country || 'Unknown',
+        displayName: data.display_name
+      };
+    } catch (error) {
+      console.error('Error fetching location details:', error);
+      return { state: 'Unknown', country: 'Unknown', displayName: 'Location not found' };
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,41 +102,52 @@ export default function Home() {
 
     fetchData();
 
-    // Listen for the 'newEntry' event from the server
     socket.on("newEntry", (data) => {
       console.log("Received new entry: ", data);
-      // You can update the state with new data if necessary
-      setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]); // Add the new alert to the top
+      setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]); 
     });
 
-    // Cleanup the effect when the component unmounts
     return () => {
       socket.off("newEntry");
     };
   }, []);
 
-  // Fetch weather data based on user's location
   useEffect(() => {
+
+    const updateLastUpdatedTime = () => {
+      setLastUpdatedTime(new Date());
+    };
+
     const fetchWeather = async (latitude, longitude) => {
       try {
-        const response = await fetch(
+        const weatherResponse = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=4ed98d532b4c809519991fa9cf60197c`
         );
 
-        if (!response.ok) {
-          const data = await response.json();
+        if (!weatherResponse.ok) {
+          const data = await weatherResponse.json();
           throw new Error(data.message || "Failed to fetch weather data.");
         }
 
-        const data = await response.json();
+        const weatherData = await weatherResponse.json();
+
+        const locationData = await fetchLocationDetails(latitude, longitude);
+
+        console.log("Location Details in Weather Fetch:", locationData);
+
         setWeather({
-          temperature: data.main.temp,
-          condition: data.weather[0].description,
-          location: data.name,
+          temperature: weatherData.main.temp,
+          condition: weatherData.weather[0].description,
+          location: weatherData.name,
+          state: locationData.state,
+          country: locationData.country
         });
+        
+        updateLastUpdatedTime();
+
       } catch (err) {
-        setError("Unable to fetch weather data. Please try again.");
-        console.error("Weather API Error:", err);
+        setError("Unable to fetch weather and location data. Please try again.");
+        console.error("API Error:", err);
       }
     };
 
@@ -109,6 +164,49 @@ export default function Home() {
       setError("Geolocation is not supported by your browser.");
     }
   }, []);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await fetch('/api/alerts').then(res => res.json());
+        setAlerts(result);
+
+        const details = {};
+        for (const disaster of result) {
+          if (disaster.latitude && disaster.longitude) {
+            details[`${disaster.latitude},${disaster.longitude}`] = await fetchLocationDetails(
+              disaster.latitude, 
+              disaster.longitude
+            );
+          }
+        }
+        setLocationDetails(details);
+      } catch (error) {
+        console.error('Failed to fetch alerts', error);
+      }
+    };
+
+    fetchData();
+
+    socket.on("newEntry", async (data) => {
+      console.log("Received new entry: ", data);
+      setAlerts((prevAlerts) => [...prevAlerts, { ...data, color: "orange" }]);
+      
+      if (data.latitude && data.longitude) {
+        const locationInfo = await fetchLocationDetails(data.latitude, data.longitude);
+        setLocationDetails(prev => ({
+          ...prev,
+          [`${data.latitude},${data.longitude}`]: locationInfo
+        }));
+      }
+    });
+
+    return () => {
+      socket.off("newEntry");
+    };
+  }, []);
+
+
 
   useEffect(() => {
     const navbar = document.querySelector(".navbar");
@@ -116,10 +214,8 @@ export default function Home() {
 
     const handleScroll = () => {
       if (window.scrollY > lastScrollY) {
-        // Scrolling down
         navbar.style.transform = "translateY(0)";
       } else {
-        // Scrolling up
         navbar.style.transform = "translateY(-110%)";
       }
       lastScrollY = window.scrollY;
@@ -127,7 +223,6 @@ export default function Home() {
 
     window.addEventListener("scroll", handleScroll);
 
-    // Cleanup event listener on component unmount
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -137,13 +232,11 @@ export default function Home() {
     setOpenLoginDialog(true);
   };
 
-  // Close the login dialog
   const handleCloseLoginDialog = () => {
     setOpenLoginDialog(false);
     setCredentials({ username: "", password: "" });
   };
 
-  // Handle the login form submission
   const handleLogin = (credentials) => {
     const { username, password } = credentials;
 
@@ -153,11 +246,31 @@ export default function Home() {
     ) {
       handleCloseLoginDialog();
       navigate("/dashboard");
-      return true; // Login successful
+      return true;
     } else {
-      return false; // Login failed
+      return false; 
     }
   };
+
+  const [copiedNumber, setCopiedNumber] = useState(null);
+
+  const handleCopy = (number) => {
+    setCopiedNumber(number);
+    setTimeout(() => setCopiedNumber(null), 2000); 
+  };
+
+  const CopyNumberTooltip = ({ number, children }) => (
+    <CopyToClipboard text={number} onCopy={() => handleCopy(number)}>
+      <Tooltip 
+        title={copiedNumber === number ? "Copied!" : "Click to Copy"} 
+        placement="top"
+      >
+        <span className="cursor-pointer">{children}</span>
+      </Tooltip>
+    </CopyToClipboard>
+  );
+
+
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#dbeafe" }}>
@@ -289,7 +402,7 @@ export default function Home() {
                     style={{ width: "fit-content" }}
                     className="shadow-md border border-blue-200 text-sm"
                   >
-                    &nbsp;Last Updated: 19 Sep 2024 2:32PM
+                    &nbsp;Last Updated: {formatLastUpdatedTime(lastUpdatedTime)}
                   </Badge>
                 </p>
               </CardContent>
@@ -329,8 +442,39 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Login Dialog */}
+        <div className="fixed bottom-8 left-8 z-50">
+        <button
+          onClick={handleOpenContactsDialog}
+          onMouseEnter={() => setIsContactHovered(true)}
+          onMouseLeave={() => setIsContactHovered(false)}
+          className={`
+            group flex items-center justify-center 
+            bg-red-600 text-white 
+            rounded-full 
+            shadow-2xl hover:shadow-red-500/50 
+            transition-all duration-300 ease-in-out
+            hover:scale-105 active:scale-95
+            ${isContactHovered ? "w-64" : "w-16 px-0"}
+            h-14 
+            overflow-hidden 
+            focus:outline-none
+          `}
+        >
+          <div className="flex items-center ">
+            <Phone className={`text-white transition-transform duration-300`} size={34} />
+            {isContactHovered && (
+              <span className="w-[40vw] text-md font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                Click to access emergency contacts
+              </span>
+            )}
+          </div>
+        </button>
+      </div>
 
+      {/* Emergency Contacts Dialog */}
+      <EmergencyContacts openContactsDialog={openContactsDialog} handleCloseContactsDialog={handleCloseContactsDialog} CopyNumberTooltip={CopyNumberTooltip} selectedDistrict={selectedDistrict} setSelectedDistrict={setSelectedDistrict} />
+
+        {/* Login Dialog */}
         <LoginDialog
           open={openLoginDialog}
           onClose={handleCloseLoginDialog}
@@ -339,166 +483,7 @@ export default function Home() {
           setCredentials={setCredentials}
         />
 
-        {/* Key Features Section */}
-        <section className="mt-16 bg-gray-50 py-16">
-          <div className="container mx-auto px-4">
-            <hr className="border-t-2 border-blue-200 mb-8 w-24 mx-auto" />
-            <h2 className="text-center text-4xl font-extrabold mb-12 text-gray-800 tracking-tight">
-              Powerful Platform Features
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Feature 1 */}
-              <div className="group">
-                <Card
-                  className="
-        bg-white 
-        shadow-lg 
-        hover:shadow-2xl 
-        hover:scale-101 
-        transition-all 
-        duration-500 
-        ease-in-out 
-        border-t-4 
-        border-blue-500 
-        rounded-xl 
-        overflow-hidden
-      "
-                >
-                  <CardContent className="p-8 text-center">
-                    <div
-                      className="
-          bg-blue-100 
-          text-blue-600 
-          rounded-full 
-          w-20 
-          h-20 
-          flex 
-          items-center 
-          justify-center 
-          mx-auto 
-          mb-6 
-          transform 
-          group-hover:rotate-12 
-          transition-transform 
-          duration-500
-        "
-                    >
-                      <Globe size={42} className="text-blue-600" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                      Real-Time Data Aggregation
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      Collects and analyzes data from multiple sources including
-                      social media, news outlets, and user reports to provide
-                      accurate and timely disaster information.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="group">
-                <Card
-                  className="
-        bg-white 
-        shadow-lg 
-        hover:shadow-2xl 
-        hover:scale-101 
-        transition-all 
-        duration-500 
-        ease-in-out 
-        border-t-4 
-        border-green-500 
-        rounded-xl 
-        overflow-hidden
-      "
-                >
-                  <CardContent className="p-8 text-center">
-                    <div
-                      className="
-          bg-green-100 
-          text-green-600 
-          rounded-full 
-          w-20 
-          h-20 
-          flex 
-          items-center 
-          justify-center 
-          mx-auto 
-          mb-6 
-          transform 
-          group-hover:rotate-12 
-          transition-transform 
-          duration-500
-        "
-                    >
-                      <Languages size={42} className="text-green-600" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                      Multi-Language Support
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      Seamlessly supports multiple languages for content and
-                      interface, enabling users from diverse regions to interact
-                      with the platform effectively and intuitively.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="group">
-                <Card
-                  className="
-        bg-white 
-        shadow-lg 
-        hover:shadow-2xl 
-        hover:scale-101 
-        transition-all 
-        duration-500 
-        ease-in-out 
-        border-t-4 
-        border-purple-500 
-        rounded-xl 
-        overflow-hidden
-      "
-                >
-                  <CardContent className="p-8 text-center">
-                    <div
-                      className="
-          bg-purple-100 
-          text-purple-600 
-          rounded-full 
-          w-20 
-          h-20 
-          flex 
-          items-center 
-          justify-center 
-          mx-auto 
-          mb-6 
-          transform 
-          group-hover:rotate-12 
-          transition-transform 
-          duration-500
-        "
-                    >
-                      <LayoutDashboard size={42} className="text-purple-600" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                      User-Friendly Dashboard
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      Provides disaster management agencies with a streamlined,
-                      intuitive dashboard for rapid access to categorized
-                      reports, real-time alerts, and critical information.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </section>
+        <KeyFeatures/>
       </main>
       <End />
     </div>

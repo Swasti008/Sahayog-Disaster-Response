@@ -157,7 +157,7 @@ export function SidebarItem({ icon, text, active, alert }) {
       {/* Text */}
       <span
         className={`overflow-hidden transition-all text-lg font-semibold ${
-          expanded ? "w-48 ml-4" : "w-0" // Adjusted width here
+          expanded ? "w-48 ml-4" : "w-0"
         }`}
       >
         {text}

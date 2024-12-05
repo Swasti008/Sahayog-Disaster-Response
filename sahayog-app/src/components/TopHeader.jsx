@@ -8,7 +8,6 @@ const Header = () => {
   return (
     <header className="bg-blue-500 text-white  py-1 px-6 shadow-xl">
       <div className="flex justify-between items-center">
-        {/* Left Side: Logo */}
         <div className="flex items-center">
           <img src={Logo} className="h-16" />
         </div>

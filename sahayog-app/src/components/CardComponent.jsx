@@ -8,7 +8,6 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
     console.log(data);
   }, [data]);
 
-  // Custom date formatting function
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
@@ -60,7 +59,6 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
       <div className="p-6">
         <div className={`grid grid-cols-1 gap-4 ${viewMode === 'grid' ? 'grid-view-layout' : 'md:grid-cols-2'}`}>
           <div>
-            {/* Location and timestamp details */}
             <div className="flex items-center text-gray-600 mb-2">
               <MapPin className="mr-2 text-blue-500" size={20} />
               <span className="font-medium">
@@ -76,13 +74,11 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
             </p>
           </div>
           <div className={`flex ${viewMode === 'grid' ? 'flex-row mt-3 items-center' : 'flex-col gap-3'} align-center ${viewMode === 'grid' ? 'space-x-4' : ''}`}>
-            {/* Approve Button */}
             <button className={`bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded-lg hover:from-green-500 hover:to-green-600 transition-all text-sm duration-200 ease-in-out w-full max-w-[140px] ml-auto
               ${viewMode === 'grid' ? 'px-1 h-8' : ''}
             `}>
               Approve
             </button>
-            {/* View Details Button */}
             <button
               onClick={() => handleDetailClick(alert)}
               className={`bg-gradient-to-r from-blue-400 to-blue-500 text-white px-3 py-2 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-200 text-sm ease-in-out w-full max-w-[140px] ml-auto
@@ -91,7 +87,6 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
             >
               View Details
             </button>
-            {/* Reject Button */}
             <button className={`bg-gradient-to-r from-red-400 to-red-500 text-white px-4 py-2 rounded-lg hover:from-red-500 hover:to-red-600 transition-all duration-200 text-sm ease-in-out w-full max-w-[140px] ml-auto
               ${viewMode === 'grid' ? 'px-1 h-8' : ''}
             `}>

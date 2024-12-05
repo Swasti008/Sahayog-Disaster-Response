@@ -6,11 +6,9 @@ const LegendComponent = () => {
     <Box
     className="flex items-center gap-6 pl-4 rounded-lg shadow-sm"
     sx={{
-      // background: "linear-gradient(135deg, #e0f7fa, #b3e5fc)",
       display: "flex",
       flexDirection: "row",
-      alignItems: "center",
-      // border: "1px solid #81d4fa",
+      alignItems: "center"
     }}
   >
     <Typography
