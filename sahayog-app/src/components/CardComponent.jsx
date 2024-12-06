@@ -1,41 +1,42 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Clock, AlertTriangle, ShieldCheck, Camera, X } from "lucide-react";
+import {
+  MapPin,
+  Clock,
+  AlertTriangle,
+  ShieldCheck,
+  Camera,
+  X,
+} from "lucide-react";
+import axios from "axios";
 
-const CardComponent = ({ data, viewMode = 'scroll' }) => {
+const CardComponent = ({ data, viewMode = "scroll" }) => {
   const [selectedAlert, setSelectedAlert] = useState(null);
+  const [districtData, setDistrictData] = useState(null);
 
   useEffect(() => {
-    console.log(data);
+    // console.log(data);
   }, [data]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+    return date.toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
-  const getAlertTypeColor = (type) => {
-    const colorMap = {
-      'warning': 'bg-yellow-100 text-yellow-800',
-      'critical': 'bg-red-100 text-red-800',
-      'info': 'bg-blue-100 text-blue-800',
-      'normal': 'bg-green-100 text-green-800'
-    };
-    return colorMap[type?.toLowerCase()] || 'bg-gray-100 text-gray-800';
-  };
-
-  const handleDetailClick = (alert) => {
+  const handleDetailClick = async (alert) => {
     setSelectedAlert(alert);
-  };
+      await fetchDistrictData(alert.location.state, alert.location.city);
+  };  
 
   const handleCloseModal = () => {
     setSelectedAlert(null);
+    setDistrictData(null)
   };
 
   const renderAlertCard = (alert) => (
@@ -43,26 +44,39 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
       key={alert._id}
       className={`
         bg-white rounded-3xl shadow-lg transition-all duration-300 ease-in-out mb-6 overflow-hidden border-l-8 
-        ${viewMode === 'grid' ? 'grid-card-style' : ''}
+        ${viewMode === "grid" ? "grid-card-style" : ""}
         hover:shadow-2xl hover:scale-[1.02] hover:opacity-95
       `}
       style={{
-        borderLeftColor: alert.type === 'critical' ? '#EF4444' :
-          alert.type === 'warning' ? '#F59E0B' :
-            alert.type === 'info' ? '#3B82F6' : '#10B981'
+        borderLeftColor:
+          alert.type === "critical"
+            ? "#EF4444"
+            : alert.type === "warning"
+            ? "#F59E0B"
+            : alert.type === "info"
+            ? "#3B82F6"
+            : "#10B981",
       }}
     >
-      <div className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md w-fit`}>
-        {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)} {/* Capitalize disaster type */}
+      <div
+        className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md w-fit`}
+      >
+        {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)}{" "}
+        {/* Capitalize disaster type */}
       </div>
 
       <div className="p-6">
-        <div className={`grid grid-cols-1 gap-4 ${viewMode === 'grid' ? 'grid-view-layout' : 'md:grid-cols-2'}`}>
+        <div
+          className={`grid grid-cols-1 gap-4 ${
+            viewMode === "grid" ? "grid-view-layout" : "md:grid-cols-2"
+          }`}
+        >
           <div>
             <div className="flex items-center text-gray-600 mb-2">
               <MapPin className="mr-2 text-blue-500" size={20} />
               <span className="font-medium">
-                {alert.location?.city}, {alert.location?.state}, {alert.location?.country}
+                {alert.location?.city}, {alert.location?.state},{" "}
+                {alert.location?.country}
               </span>
             </div>
             <div className="flex items-center text-gray-600 mb-2">
@@ -73,23 +87,33 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
               <strong>Description:</strong> {alert.description}
             </p>
           </div>
-          <div className={`flex ${viewMode === 'grid' ? 'flex-row mt-3 items-center' : 'flex-col gap-3'} align-center ${viewMode === 'grid' ? 'space-x-4' : ''}`}>
-            <button className={`bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded-lg hover:from-green-500 hover:to-green-600 transition-all text-sm duration-200 ease-in-out w-full max-w-[140px] ml-auto
-              ${viewMode === 'grid' ? 'px-1 h-8' : ''}
-            `}>
+          <div
+            className={`flex ${
+              viewMode === "grid"
+                ? "flex-row mt-3 items-center"
+                : "flex-col gap-3"
+            } align-center ${viewMode === "grid" ? "space-x-4" : ""}`}
+          >
+            <button
+              className={`bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded-lg hover:from-green-500 hover:to-green-600 transition-all text-sm duration-200 ease-in-out w-full max-w-[140px] ml-auto
+              ${viewMode === "grid" ? "px-1 h-8" : ""}
+            `}
+            >
               Approve
             </button>
             <button
               onClick={() => handleDetailClick(alert)}
               className={`bg-gradient-to-r from-blue-400 to-blue-500 text-white px-3 py-2 rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-200 text-sm ease-in-out w-full max-w-[140px] ml-auto
-                ${viewMode === 'grid' ? 'px-1 h-8' : ''}
+                ${viewMode === "grid" ? "px-1 h-8" : ""}
               `}
             >
               View Details
             </button>
-            <button className={`bg-gradient-to-r from-red-400 to-red-500 text-white px-4 py-2 rounded-lg hover:from-red-500 hover:to-red-600 transition-all duration-200 text-sm ease-in-out w-full max-w-[140px] ml-auto
-              ${viewMode === 'grid' ? 'px-1 h-8' : ''}
-            `}>
+            <button
+              className={`bg-gradient-to-r from-red-400 to-red-500 text-white px-4 py-2 rounded-lg hover:from-red-500 hover:to-red-600 transition-all duration-200 text-sm ease-in-out w-full max-w-[140px] ml-auto
+              ${viewMode === "grid" ? "px-1 h-8" : ""}
+            `}
+            >
               Reject
             </button>
           </div>
@@ -97,6 +121,38 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    console.log(districtData)
+  }, [districtData])
+
+  const fetchDistrictData = async (state, city) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/emergency/getData"
+      );
+      if (response.data) {
+        for (let i = 0; i < response.data.length; i++) {
+          if (response.data[i].state.toLowerCase() === state.toLowerCase()) {
+            for (let j = 0; j < response.data[i].districts.length; j++) {
+              if (response.data[i].districts[j].name.toLowerCase() === city.toLowerCase()) {
+                console.log(response.data[i].districts[j])
+                setDistrictData(response.data[i].districts[j])
+                return;
+              }
+            }
+          }
+          return;
+        }
+      } else {
+        console.error("Invalid data format received from the server");
+        return;
+      }
+    } catch (error) {
+      console.error("Error fetching district data:", error);
+      return;
+    }
+  };
 
   const renderDetailModal = () => {
     if (!selectedAlert) return null;
@@ -108,12 +164,17 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
             onClick={handleCloseModal}
             className="absolute top-4 right-4 bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-full transition-colors group"
           >
-            <X size={24} className="group-hover:rotate-90 transition-transform" />
+            <X
+              size={24}
+              className="group-hover:rotate-90 transition-transform"
+            />
           </button>
 
           <h2 className="text-3xl font-bold mb-6 text-gray-800 flex items-center bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
             <AlertTriangle className="mr-3 text-blue-500" size={32} />
-            {selectedAlert.type.charAt(0).toUpperCase() + selectedAlert.type.slice(1)} Alert Details
+            {selectedAlert.type.charAt(0).toUpperCase() +
+              selectedAlert.type.slice(1)}{" "}
+            Alert Details
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -124,7 +185,8 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
                   Location
                 </h3>
                 <p className="text-gray-600 font-medium">
-                  {selectedAlert.location.city}, {selectedAlert.location.state}, {selectedAlert.location.country}
+                  {selectedAlert.location.city}, {selectedAlert.location.state},{" "}
+                  {selectedAlert.location.country}
                 </p>
               </div>
 
@@ -144,8 +206,14 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
                   Additional Details
                 </h3>
                 <div className="space-y-2">
-                  <p><strong>Severity:</strong> {selectedAlert.criticality?.severity || 'N/A'}</p>
-                  <p><strong>Credibility:</strong> {selectedAlert.numberOfPosts || 'N/A'}</p>
+                  <p>
+                    <strong>Severity:</strong>{" "}
+                    {selectedAlert.criticality?.severity || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Credibility:</strong>{" "}
+                    {selectedAlert.numberOfPosts || "N/A"}
+                  </p>
                   <p>
                     <strong>Coordinates:</strong>
                     {` ${selectedAlert.location.coordinates.latitude}, ${selectedAlert.location.coordinates.longitude}`}
@@ -155,29 +223,41 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
             </div>
 
             <div>
-              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg shadow-md">
-                <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
-                  <Camera className="mr-2 text-blue-500" size={20} />
-                  Media Attachment
-                </h3>
-                {selectedAlert.media ? (
-                  <div className="text-center">
-                    <img
-                      src="/api/placeholder/400/320"
-                      alt="Alert media"
-                      className="rounded-lg mb-4 max-h-[400px] w-full object-cover shadow-lg hover:scale-105 transition-transform"
-                    />
-                    <a
-                      href={selectedAlert.media.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+              <div>
+                {districtData ? (
+                  
+                    <div
+                      className="mb-6 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-md"
                     >
-                      Open Full Image
-                    </a>
-                  </div>
+                      <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                        <ShieldCheck className="mr-2 text-blue-500" size={20} />
+                        District Information
+                      </h3>
+                      <div className="space-y-2">
+                        <p>
+                          <strong>District Name:</strong>{" "}
+                          {districtData.name || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Fire Department:</strong>{" "}
+                          {districtData.fire_department.contact_number || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Police Contact:</strong>{" "}
+                          {districtData.police_station.contact_number || "N/A"}
+                        </p>
+                        <p>
+                          <strong>Hospital Contact:</strong>{" "}
+                          {districtData.hospitals[0].contact_number || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  
                 ) : (
-                  <p className="text-gray-500 italic">No media attached</p>
+                  <p className="text-gray-500 italic">
+                    No district information available for this state.
+                    {/* {districtData.name} */}
+                  </p>
                 )}
               </div>
             </div>
@@ -189,8 +269,14 @@ const CardComponent = ({ data, viewMode = 'scroll' }) => {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-6'}>
-        {data?.map(alert => renderAlertCard(alert))}
+      <div
+        className={
+          viewMode === "grid"
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "space-y-6"
+        }
+      >
+        {data?.map((alert) => renderAlertCard(alert))}
       </div>
       {renderDetailModal()}
     </div>
