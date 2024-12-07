@@ -26,6 +26,36 @@ function EmergencyContacts({
   const [districts, setDistricts] = useState([]);
   const [detectedState, setDetectedState] = useState('')
 
+    // Fetch emergency data based on location
+    const fetchEmergencyData = async (state = null) => {
+      try {
+        const params = state ? { state } : {};
+        const response = await axios.get('http://localhost:5000/emergency/getData', { params });
+        
+        if (response.data && response.data.length > 0) {
+          var data = ''; 
+          for (let i = 0; i < response.data.length; i++) {
+            if (response.data[i].state == detectedState) {
+              data = response.data[i];
+              break;
+            }
+          }
+          setStateData(data);
+          // console.log(response.data)
+          
+          const districtNames = data.districts.map(district => district.name);
+          setDistricts(districtNames);
+          
+          if (districtNames.length > 0) {
+            setSelectedDistrict(districtNames[0]);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching emergency data:", error);
+        setLocationError(error);
+      }
+    };
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -64,37 +94,7 @@ function EmergencyContacts({
     }
   }, []);
 
-  // Fetch emergency data based on location
-  const fetchEmergencyData = async (state = null) => {
-    try {
-      const params = state ? { state } : {};
-      const response = await axios.get('http://localhost:5000/emergency/getData', { params });
-      
-      if (response.data && response.data.length > 0) {
-        var data = ''; 
-        for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i].state == detectedState) {
-            data = response.data[i];
-            break;
-          }
-        }
-        setStateData(data);
-        console.log(response.data)
-        
-        const districtNames = data.districts.map(district => district.name);
-        setDistricts(districtNames);
-        
-        if (districtNames.length > 0) {
-          setSelectedDistrict(districtNames[0]);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching emergency data:", error);
-      setLocationError(error);
-    }
-  };
-
-  if (!stateData) {
+  if (!stateData || !detectedState) {
     fetchEmergencyData()
     return (
       <Dialog 
