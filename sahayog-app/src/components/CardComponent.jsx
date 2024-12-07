@@ -131,26 +131,29 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
       const response = await axios.get(
         "http://localhost:5000/emergency/getData"
       );
+  
+      console.log("Response from server:", response.data);
+  
       if (response.data) {
         for (let i = 0; i < response.data.length; i++) {
           if (response.data[i].state.toLowerCase() === state.toLowerCase()) {
             for (let j = 0; j < response.data[i].districts.length; j++) {
-              if (response.data[i].districts[j].name.toLowerCase() === city.toLowerCase()) {
-                console.log(response.data[i].districts[j])
-                setDistrictData(response.data[i].districts[j])
+              if (
+                response.data[i].districts[j].name.toLowerCase() === city.toLowerCase()
+              ) {
+                console.log(response.data[i].districts[j]);
+                setDistrictData(response.data[i].districts[j]);
                 return;
               }
             }
           }
-          return;
         }
+        console.error("No matching district found for the given state and city");
       } else {
         console.error("Invalid data format received from the server");
-        return;
       }
     } catch (error) {
       console.error("Error fetching district data:", error);
-      return;
     }
   };
 
