@@ -1,37 +1,51 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import React, { useEffect, useState, useRef } from "react";
+import { useLocation } from "react-router";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from 'leaflet';
-import fetchDistrictData from './services/FetchDistrictData';
-import { Chart } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import axios from 'axios';
-import QuickReports from './QuickReportsNdrf';
-// Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-import Modal from './Model';
+import L from "leaflet";
+import fetchDistrictData from "./services/FetchDistrictData";
+import { Chart } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import axios from "axios";
+import moment from "moment";
+import { Clock, Search, Clock as ClockIcon } from "lucide-react";
+import Modal from "./Model";
+import QuickReports from "./QuickReportsNdrf";
 
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const customIcon = new L.Icon({
-  iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png", 
+  iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
   iconSize: [32, 32],
-  iconAnchor: [16, 32], 
-  popupAnchor: [0, -32], 
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32],
 });
 
 function DetailedReports() {
   const location = useLocation();
-  const { alert } = location.state || {}; 
+  const { alert } = location.state || {};
   const [quickReports, setQuickReports] = useState([]);
   const [districtData, setDistrictData] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [articles, setArticles] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const [error, setError] = useState('');
-  // const [quickReportData, setQuickReportData] = useState({
-  //   title: '',
-  //   description: '',
-  // })
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
+  const articlesRef = useRef(null); // Reference to the news articles section
 
   if (!alert) {
     return <p>No data available to track reports.</p>;
@@ -52,10 +66,12 @@ function DetailedReports() {
   useEffect(() => {
     const fetchQuickReports = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/track-report/${alert._id}`);
+        const response = await fetch(
+          `http://localhost:3000/track-report/${alert._id}`
+        );
         const data = await response.json();
         if (response.ok) {
-          setQuickReports(data); // Set the fetched reports in state
+          setQuickReports(data);
         } else {
           setError(data.message);
         }
@@ -65,36 +81,42 @@ function DetailedReports() {
     };
 
     fetchQuickReports();
-  }, [quickReports]);
+  }, [alert._id]);
 
   const fetchArticles = async (query) => {
     try {
-      const response = await axios.get(`http://localhost:4000/search?query=${query}`);
+      const response = await axios.get(
+        `http://localhost:4000/search?query=${query}`
+      );
       setArticles(response.data.articles);
+
+      if (articlesRef.current) {
+        articlesRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     } catch (error) {
-      console.error('Error fetching news articles:', error.message);
+      console.error("Error fetching news articles:", error.message);
     }
   };
 
-  // Handle search input change
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+    const query = event.target.value;
+    setSearchQuery(query);
   };
 
-  // Fetch articles when search query changes
-  useEffect(() => {
-    if (searchQuery) {
+  const handleSearchKeyDown = (event) => {
+    if (event.key === "Enter" && searchQuery) {
       fetchArticles(searchQuery);
-    } else {
-      setArticles([]); // Clear articles when search query is empty
     }
-  }, [searchQuery]);
+  };
 
   useEffect(() => {
     const FetchDistrictData = async () => {
       try {
         if (alert && alert.location) {
-          const result = await fetchDistrictData(alert.location.state, alert.location.city);
+          const result = await fetchDistrictData(
+            alert.location.state,
+            alert.location.city
+          );
           setDistrictData(result);
         }
       } catch (error) {
@@ -102,33 +124,34 @@ function DetailedReports() {
       }
     };
 
-    // Only fetch data if alert and location data exist
     if (alert?.location?.state && alert?.location?.city) {
       FetchDistrictData();
     }
-  }, [alert]);
+  }, [alert, isModalOpen]);
+
   const chartData = {
-    labels: ['Population', 'Active Users', 'Rescue Operations Active', 'Number of Posts'],
+    labels: [
+      "Population",
+      "Active Users",
+      "Rescue Operations",
+      "Community Posts",
+    ],
     datasets: [
       {
-        label: 'Disaster Metrics',
-        data: [500000, 80, 10, 120], // Hardcoded values for now
-        backgroundColor: 'rgba(54, 162, 235, 0.5)', // Active Users
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      },
-      {
-        label: 'Rescue Operations',
-        data: [0, 0, 10, 0], // Active Rescue Operations
-        backgroundColor: 'rgba(255, 159, 64, 0.5)',
-        borderColor: 'rgba(255, 159, 64, 1)',
-        borderWidth: 1,
-      },
-      {
-        label: 'Posts',
-        data: [0, 0, 0, 120], // Number of Posts
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderColor: 'rgba(255, 99, 132, 1)',
+        label: "Disaster Metrics",
+        data: [500000, 80, 10, 120],
+        backgroundColor: [
+          "rgba(54, 162, 235, 0.5)",
+          "rgba(255, 99, 132, 0.5)",
+          "rgba(255, 206, 86, 0.5)",
+          "rgba(75, 192, 192, 0.5)",
+        ],
+        borderColor: [
+          "rgba(54, 162, 235, 1)",
+          "rgba(255, 99, 132, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(75, 192, 192, 1)",
+        ],
         borderWidth: 1,
       },
     ],
@@ -138,225 +161,252 @@ function DetailedReports() {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top',
+        position: "top",
       },
       title: {
         display: true,
-        text: 'Disaster Metrics Overview',
+        text: "Disaster Impact Overview",
       },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          stepSize: 50, // Adjust tick intervals for clarity
+          stepSize: 50,
         },
       },
     },
   };
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  // Close Modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-
-
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Page Header */}
-      <h1 className="text-2xl font-bold mb-6">Detailed Report</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-6 px-4">
+      <div className="container mx-auto w-6xl">
+        <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden relative">
+          {/* Decorative Gradient */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
-      {/* Main Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Location and Disaster Info */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-2">Location</h2>
-          <p>{alert.location?.city}, {alert.location?.state}</p>
-          <h2 className="text-lg font-semibold mt-4 mb-2">Disaster Type</h2>
-          <p>{alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)}</p>
-          <h2 className="text-lg font-semibold mt-4 mb-2">Timings</h2>
-          <p>{formatDate(alert.timestamp)}</p>
-        </div>
-
-        {/* Social Media Posts */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Social Media Posts ({alert.numberOfPosts || 0})</h2>
-          <div className="space-y-2 max-h-44 overflow-y-auto">
-            {alert.posts?.map((post, index) => (
-              <div key={index} className="bg-gray-200 p-4 rounded shadow-md">
-                <p className="font-semibold text-sm">{post.user.username}</p>
-                <p className="text-sm mt-1">{post.post.text}</p>
-                <p className="text-xs text-gray-500 mt-2">{formatDate(post.createdAt)}</p>
-              </div>
-            ))}
-            {/* If no posts, show a message */}
-            {alert.posts?.length === 0 && <p>No posts available for this disaster.</p>}
-          </div>
-        </div>
-
-        {/* Map Section */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Map Location</h2>
-          <MapContainer
-            center={[20.5937, 78.9629]}
-            zoom={3}
-            scrollWheelZoom={false}
-            style={{ height: "200px", width: "100%" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-            <Marker position={[
-                        alert.location?.coordinates.latitude,
-                        alert.location?.coordinates.longitude,
-                      ]}
-                      icon={customIcon}>
-              <Popup>
-                {alert.location?.city || "Unknown City"},{" "}
-                {alert.location?.state || "Unknown State"}
-              </Popup>
-            </Marker>
-          </MapContainer>
-        </div>
-
-        {/* Image Gallery */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Images</h2>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="h-24 bg-gray-200"></div>
-            <div className="h-24 bg-gray-200"></div>
-            <div className="h-24 bg-gray-200"></div>
-            <div className="h-24 bg-gray-200"></div>
-          </div>
-        </div>
-
-        {/* Graph Overview */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Graph Overview</h2>
-          <div className="h-60 bg-gray-300 flex items-center justify-center">
-            <Chart type="bar" data={chartData} options={chartOptions} />
-          </div>
-        </div>
-
-
-        {/* News Articles */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">News Articles</h2>
-          {/* Search Bar */}
-          <input
-            type="text"
-            className="border border-gray-300 rounded p-2 mb-4 w-full"
-            placeholder="Search news articles..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          <div className="space-y-2 max-h-44 overflow-y-auto">
-            {articles.length === 0 && searchQuery ? (
-              <p>No articles found for "{searchQuery}".</p>
-            ) : (
-              articles.map((article, index) => (
-                <div key={index} className="bg-gray-200 p-4 rounded shadow-md">
-                  <p className="font-semibold text-sm">{article.author || "Unknown Author"}</p>
-                  <p className="text-sm mt-1">{article.title}</p>
-                  <p className="text-xs text-gray-500 mt-2">{formatDate(article.publishedAt)}</p>
-                  <a href={article.url} className="text-blue-500 text-sm mt-2 block" target="_blank" rel="noopener noreferrer">Read more</a>
+          {/* Header Section */}
+          <div className="px-6 py-6 bg-gray-50 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="bg-blue-100 p-3 rounded-full animate-pulse-slow">
+                  <ClockIcon className="h-8 w-8 text-blue-600" />
                 </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Sahayog App Details */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Sahayog App Details</h2>
-          <p>Active People: 100</p>
-          <p>Community Chat: Enabled</p>
-        </div>
-
-        {/* Contact Info */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Contact Info: {districtData?.name}</h2>
-          <ul>
-            <p><strong>Fire Department:</strong> {districtData ? districtData.fire_department?.contact_number || "N/A" : "Loading..."}</p>
-            <p><strong>Police Contact:</strong> {districtData ? districtData.police_station?.contact_number || "N/A" : "Loading..."}</p>
-            <p><strong>Hospital Contact:</strong> {districtData ? districtData.hospitals[0]?.contact_number || "N/A" : "Loading..."}</p>
-          </ul>
-        </div>
-
-        {/* Quick Reports */}
-        
-         
-
-
-
-{/* Display existing quick reports */}
-<div className="p-6 bg-white rounded-lg shadow-md ">
-  {quickReports.length === 0 ? (
-    <p className="text-center text-gray-500">No reports found for this disaster.</p>
-  ) : (
-    <>
-      <h3 className="text-2xl font-semibold mb-4">Existing Quick Reports</h3>
-      <div className="space-y-6 max-h-44 overflow-y-auto">
-        {quickReports.map((report) => (
-          <div
-            key={report._id}
-            className="p-4 border border-gray-300 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow duration-300"
-          >
-            <p className="text-lg font-medium text-gray-800">Status: <span className="font-normal text-gray-600">{report.status}</span></p>
-            <p className="text-lg font-medium text-gray-800">Comments: <span className="font-normal text-gray-600">{report.comments}</span></p>
-            <p className="text-lg font-medium text-gray-800">Team Message: <span className="font-normal text-gray-600">{report.teamMessage}</span></p>
-          </div>
-        ))}
-      </div>
-    </>
-  )}
-
-
-
-{error && <p style={{ color: "red" }}>{error}</p>}
-      <button
-        onClick={openModal}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Add or Update Quick Report
-      </button>
-
-      {/* Modal for Quick Report Form */}
-      {isModalOpen && (
-        <Modal closeModal={closeModal}>
-          <QuickReports alert={alert}/>
-        </Modal>
-      )}
-      
-      <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-        Download Report
-      </button>
-    </div>
-
-        {/* Tracked Reports Section */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-4">Tracked Reports</h2>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            <div className="bg-gray-200 p-4 rounded">
-              <h3 className="font-semibold text-base">Report 1</h3>
-              <p>Location: Kangra, Himachal Pradesh</p>
-              <p>Type: Landslide</p>
-              <p>Date: 12 Dec, 2024</p>
-            </div>
-            <div className="bg-gray-200 p-4 rounded">
-              <h3 className="font-semibold text-base">Report 2</h3>
-              <p>Location: Shimla, Himachal Pradesh</p>
-              <p>Type: Flood</p>
-              <p>Date: 13 Dec, 2024</p>
+                <div>
+                  <h2 className="text-3xl font-extrabold text-gray-800 tracking-tight">
+                    Detailed Disaster Report
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Comprehensive view of the disaster and its impact
+                  </p>
+                </div>
+              </div>
+              <div className="relative w-96">
+                <input
+                  type="text"
+                  placeholder="Search for news.."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleSearchKeyDown}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 text-sm"
+                />
+                <Search className="h-5 w-5 text-gray-400 absolute left-3 top-4" />
+              </div>
             </div>
           </div>
+
+          {/* Key Information Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-gray-50">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Disaster Details
+              </h3>
+              <div className="space-y-3">
+                <p>
+                  <strong>Location:</strong> {alert.location?.city},{" "}
+                  {alert.location?.state}
+                </p>
+                <p>
+                  <strong>Type:</strong>{" "}
+                  {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)}
+                </p>
+                <p>
+                  <strong>Timestamp:</strong> {formatDate(alert.timestamp)}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Quick Stats
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg text-center">
+                  <p className="text-sm text-blue-600">Total Posts</p>
+                  <p className="text-2xl font-bold">
+                    {alert.numberOfPosts || 0}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg text-center">
+                  <p className="text-sm text-green-600">Active Rescuers</p>
+                  <p className="text-2xl font-bold">10</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Map Location
+              </h3>
+              <MapContainer
+                center={[
+                  alert.location?.coordinates.latitude,
+                  alert.location?.coordinates.longitude,
+                ]}
+                zoom={10}
+                scrollWheelZoom={false}
+                style={{ height: "250px", width: "100%" }}
+                className="rounded-xl"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap contributors"
+                />
+                <Marker
+                  position={[
+                    alert.location?.coordinates.latitude,
+                    alert.location?.coordinates.longitude,
+                  ]}
+                  icon={customIcon}
+                >
+                  <Popup>
+                    {alert.location?.city}, {alert.location?.state}
+                  </Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+          </div>
+
+          {/* Detailed Metrics and Reports */}
+          <div className="pr-6 pl-6 pt-6 bg-gray-50 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Disaster Impact Metrics
+              </h3>
+              <Chart type="bar" data={chartData} options={chartOptions} />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md pr-6 pl-6 pt-6 overflow-y-scroll h-[49vh]">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                  Quick Notes
+                </h3>
+                <div className="space-y-4 mb-16">
+                  {" "}
+                  {/* Added margin-bottom for spacing */}
+                  {quickReports.length === 0 ? (
+                    <p className="text-gray-500 text-center">
+                      No quick notes available
+                    </p>
+                  ) : (
+                    quickReports.map((report) => (
+                      <div
+                        key={report._id}
+                        className="bg-gray-100 p-4 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        <p>
+                          <strong>Status:</strong> {report.status}
+                        </p>
+                        <p>
+                          <strong>Comments:</strong> {report.comments}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              {/* Sticky Button Section */}
+              <div className="bg-white pb-3 px-4 sticky bottom-0">
+                <button
+                  onClick={openModal}
+                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Add Quick Note
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* News and Social Media Section */}
+          <div className="p-6 bg-gray-50 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Social Media Posts
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {alert.posts?.map((post, index) => (
+                  <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                    <p className="font-semibold">{post.user.username}</p>
+                    <p className="text-gray-600">{post.post.text}</p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {moment(post.createdAt).fromNow()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="bg-white rounded-xl shadow-md p-6"
+              ref={articlesRef}
+            >
+              <h3 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
+                Related News Articles
+              </h3>
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {articles.length === 0 ? (
+                  <p className="text-gray-500 text-center">No articles found</p>
+                ) : (
+                  articles.map((article, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-100 p-4 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      <h4 className="font-semibold text-gray-800">
+                        {article.title}
+                      </h4>
+                      <p className="text-gray-600 text-sm">
+                        {article.description}
+                      </p>
+                      <div className="flex justify-between items-center mt-2">
+                        <span className="text-xs text-gray-500">
+                          {moment(article.publishedAt).fromNow()}
+                        </span>
+                        <a
+                          href={article.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 text-sm hover:underline"
+                        >
+                          Read more
+                        </a>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Modal for Quick Report */}
+          {isModalOpen && (
+            <Modal closeModal={closeModal}>
+              <QuickReports alert={alert} />
+            </Modal>
+          )}
         </div>
       </div>
     </div>
