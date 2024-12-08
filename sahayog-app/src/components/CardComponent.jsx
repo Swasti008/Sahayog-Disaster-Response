@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   Camera,
   X,
+  List
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import fetchDistrictData from "./services/FetchDistrictData";
@@ -14,10 +15,8 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
   const navigate =useNavigate();
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [districtData, setDistrictData] = useState(null);
-
-  useEffect(() => {
-    // console.log(data);
-  }, [data]);
+  const [stateDistricts, setStateDistricts] = useState([]);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -38,6 +37,8 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
 
   const handleDetailClick = async (alert) => {
     setSelectedAlert(alert);
+    setSelectedDistrict(null);
+    await fetchDistrictData(alert.location.state, alert.location.city);
     try {
       const result = await fetchDistrictData(alert.location.state, alert.location.city);
       setDistrictData(result);
@@ -48,9 +49,58 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
 
   const handleCloseModal = () => {
     setSelectedAlert(null);
-    setDistrictData(null)
+    setDistrictData(null);
+    setStateDistricts([]);
+    setSelectedDistrict(null);
   };
 
+  const fetchDistrictData = async (state, city) => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/emergency/getData"
+      );
+  
+      if (response.data) {
+        // Find the matching state
+        const stateData = response.data.find(
+          item => item.state.toLowerCase() === state.toLowerCase()
+        );
+
+        if (stateData) {
+          // Try to find the specific city/district
+          const cityDistrict = stateData.districts.find(
+            district => district.name.toLowerCase() === city.toLowerCase()
+          );
+
+          if (cityDistrict) {
+            // If specific district found, set it
+            setDistrictData(cityDistrict);
+          } else {
+            // If no specific district found, set all districts for the state
+            setStateDistricts(stateData.districts);
+          }
+        } else {
+          console.error("No matching state found");
+        }
+      } else {
+        console.error("Invalid data format received from the server");
+      }
+    } catch (error) {
+      console.error("Error fetching district data:", error);
+    }
+  };
+
+  const handleDistrictSelect = (district) => {
+    // If the clicked district is already selected, deselect it
+    if (selectedDistrict && selectedDistrict.name === district.name) {
+      setSelectedDistrict(null);
+      setDistrictData(null);
+    } else {
+      // Otherwise, select the new district
+      setSelectedDistrict(district);
+      setDistrictData(district);
+    }
+  };
   const renderAlertCard = (alert) => (
     <div
       key={alert._id}
@@ -74,7 +124,6 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
         className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md w-fit`}
       >
         {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)}{" "}
-        {/* Capitalize disaster type */}
       </div>
 
       <div className="p-6">
@@ -135,11 +184,34 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
     </div>
   );
 
-  useEffect(() => {
-    console.log(districtData)
-  }, [districtData])
+  const renderDistrictSelector = () => {
+    if (stateDistricts.length === 0) return null;
 
-
+    return (
+      <div className="mb-6 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-md">
+        <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+          <List className="mr-2 text-blue-500" size={20} />
+          Select District
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 h-44 overflow-scroll">
+          {stateDistricts.map((district) => (
+            <button
+              key={district.name}
+              onClick={() => handleDistrictSelect(district)}
+              className={`
+                px-3 py-2 rounded-lg text-sm transition-all duration-200 
+                ${selectedDistrict?.name === district.name 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}
+              `}
+            >
+              {district.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const renderDetailModal = () => {
     if (!selectedAlert) return null;
@@ -210,43 +282,40 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
             </div>
 
             <div>
-              <div>
-                {districtData ? (
-                  
-                    <div
-                      className="mb-6 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-md"
-                    >
-                      <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
-                        <ShieldCheck className="mr-2 text-blue-500" size={20} />
-                        District Information
-                      </h3>
-                      <div className="space-y-2">
-                        <p>
-                          <strong>District Name:</strong>{" "}
-                          {districtData.name || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Fire Department:</strong>{" "}
-                          {districtData.fire_department.contact_number || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Police Contact:</strong>{" "}
-                          {districtData.police_station.contact_number || "N/A"}
-                        </p>
-                        <p>
-                          <strong>Hospital Contact:</strong>{" "}
-                          {districtData.hospitals[0].contact_number || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  
-                ) : (
-                  <p className="text-gray-500 italic">
-                    No district information available for this state.
-                    {/* {districtData.name} */}
-                  </p>
-                )}
-              </div>
+              {renderDistrictSelector()}
+              
+              {districtData ? (
+                <div
+                  className="mb-6 bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-md"
+                >
+                  <h3 className="flex items-center text-lg font-semibold mb-2 text-gray-700">
+                    <ShieldCheck className="mr-2 text-blue-500" size={20} />
+                    District Information
+                  </h3>
+                  <div className="space-y-2">
+                    <p>
+                      <strong>District Name:</strong>{" "}
+                      {districtData.name || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Fire Department:</strong>{" "}
+                      {districtData.fire_department?.contact_number || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Police Contact:</strong>{" "}
+                      {districtData.police_station?.contact_number || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Hospital Contact:</strong>{" "}
+                      {districtData.hospitals?.[0]?.contact_number || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">
+                  Select a district to view its details.
+                </p>
+              )}
             </div>
           </div>
         </div>
