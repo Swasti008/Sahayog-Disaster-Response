@@ -116,7 +116,7 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
       }}
     >
       <div
-        className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md w-fit`}
+        className={`w-24 flex justify-center ml-5 mt-5 left-4 text-pretty font-semibold px-3 py-1 rounded-full text-gray-700 bg-gray-200 opacity-80 shadow-md`}
       >
         {alert.type?.charAt(0).toUpperCase() + alert.type?.slice(1)}{" "}
       </div>
