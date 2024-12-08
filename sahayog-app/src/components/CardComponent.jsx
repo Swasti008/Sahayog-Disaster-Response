@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import fetchDistrictData from "./services/FetchDistrictData";
+import axios from "axios";
 
 const CardComponent = ({ data, viewMode = "scroll" }) => {
   const navigate =useNavigate();
@@ -39,12 +40,6 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
     setSelectedAlert(alert);
     setSelectedDistrict(null);
     await fetchDistrictData(alert.location.state, alert.location.city);
-    try {
-      const result = await fetchDistrictData(alert.location.state, alert.location.city);
-      setDistrictData(result);
-    } catch (error) {
-      console.error("Failed to fetch district data:", error);
-    }
   };  
 
   const handleCloseModal = () => {
@@ -193,7 +188,7 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
           <List className="mr-2 text-blue-500" size={20} />
           Select District
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 h-44 overflow-scroll">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 h-44 overflow-y-scroll">
           {stateDistricts.map((district) => (
             <button
               key={district.name}
