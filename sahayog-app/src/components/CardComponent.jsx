@@ -7,9 +7,11 @@ import {
   Camera,
   X,
 } from "lucide-react";
-import axios from "axios";
+import { useNavigate } from "react-router";
+import fetchDistrictData from "./services/FetchDistrictData";
 
 const CardComponent = ({ data, viewMode = "scroll" }) => {
+  const navigate =useNavigate();
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [districtData, setDistrictData] = useState(null);
 
@@ -29,9 +31,19 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
     });
   };
 
+  const handleTrackReportsClick = (alert) => {
+    navigate("/dashboard/reports", { state: { alert } });
+  };
+
+
   const handleDetailClick = async (alert) => {
     setSelectedAlert(alert);
-      await fetchDistrictData(alert.location.state, alert.location.city);
+    try {
+      const result = await fetchDistrictData(alert.location.state, alert.location.city);
+      setDistrictData(result);
+    } catch (error) {
+      console.error("Failed to fetch district data:", error);
+    }
   };  
 
   const handleCloseModal = () => {
@@ -95,11 +107,12 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
             } align-center ${viewMode === "grid" ? "space-x-4" : ""}`}
           >
             <button
+               onClick={()=>handleTrackReportsClick(alert)}
               className={`bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded-lg hover:from-green-500 hover:to-green-600 transition-all text-sm duration-200 ease-in-out w-full max-w-[140px] ml-auto
               ${viewMode === "grid" ? "px-1 h-8" : ""}
             `}
             >
-              Approve
+              Track Reports
             </button>
             <button
               onClick={() => handleDetailClick(alert)}
@@ -126,36 +139,7 @@ const CardComponent = ({ data, viewMode = "scroll" }) => {
     console.log(districtData)
   }, [districtData])
 
-  const fetchDistrictData = async (state, city) => {
-    try {
-      const response = await axios.get(
-        "http://localhost:5000/emergency/getData"
-      );
-  
-      console.log("Response from server:", response.data);
-  
-      if (response.data) {
-        for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i].state.toLowerCase() === state.toLowerCase()) {
-            for (let j = 0; j < response.data[i].districts.length; j++) {
-              if (
-                response.data[i].districts[j].name.toLowerCase() === city.toLowerCase()
-              ) {
-                console.log(response.data[i].districts[j]);
-                setDistrictData(response.data[i].districts[j]);
-                return;
-              }
-            }
-          }
-        }
-        console.error("No matching district found for the given state and city");
-      } else {
-        console.error("Invalid data format received from the server");
-      }
-    } catch (error) {
-      console.error("Error fetching district data:", error);
-    }
-  };
+
 
   const renderDetailModal = () => {
     if (!selectedAlert) return null;
