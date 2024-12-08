@@ -15,7 +15,7 @@ import {
 } from "chart.js";
 import axios from "axios";
 import moment from "moment";
-import { Clock, Search, Clock as ClockIcon } from "lucide-react";
+import { Clock, Search, Clock as ClockIcon, ServerCrash } from "lucide-react";
 import Modal from "./Model";
 import QuickReports from "./QuickReportsNdrf";
 
@@ -45,11 +45,37 @@ function DetailedReports() {
   const [articles, setArticles] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState("");
-  const articlesRef = useRef(null); // Reference to the news articles section
+  const articlesRef = useRef(null); 
 
   if (!alert) {
-    return <p>No data available to track reports.</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="bg-white shadow-lg rounded-xl p-8 max-w-md text-center w-[50vw]">
+          <div className="text-blue-500 flex items-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-3">
+            Detailed Report Unavailable
+          </h2>
+            <ServerCrash className="w-28 h-28 mx-auto mb-4 mr-4" />
+          </div>
+          <p className="mt-0 text-gray-600 leading-relaxed text-justify ml-2 mr-2">
+            To access this section, please navigate to the <b>Dashboard</b> and click 
+            on the <b>Track Reports</b> button under any single report. From there, 
+            you can select the specific detailed report you'd like to view.
+          </p>
+          <p className="mt-4 text-sm text-gray-500">
+            This ensures you can explore detailed insights and metrics for the disaster report of your choice.
+          </p>
+          <button
+            onClick={() => window.location.href = '/dashboard'} // Redirect to dashboard
+            className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 transition-all"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
   }
+  
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

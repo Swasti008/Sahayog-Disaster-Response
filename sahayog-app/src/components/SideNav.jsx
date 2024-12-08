@@ -5,7 +5,7 @@ import Map from "../assets/india.png";
 import User from "../assets/user.png";
 import Logo from "../assets/Logo Black.png";
 import { Link } from "react-router-dom";
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react";
+import { MoreVertical, ChevronLast, ChevronFirst, HomeIcon, AlertCircle } from "lucide-react";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
@@ -17,10 +17,31 @@ export default function Sidebar({ children }) {
   const [expanded, setExpanded] = useState(true);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   let closeTimer = null;
+  const [showPopup, setShowPopup] = useState(false);
+  const [countdown, setCountdown] = useState(["3", "2", "1"]); // Countdown values
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleLogout = () => {
+    setShowPopup(true);
+    let index = 0;
+
+    const interval = setInterval(() => {
+      if (index < countdown.length - 1) {
+        setCurrentIndex(++index);
+      } else {
+        clearInterval(interval); // Clear the interval when done
+      }
+    }, 1000); // Change number every second
+
+    // Redirect to home after countdown
+    setTimeout(() => {
+      window.location.href = "/"; // Replace with your home landing page route
+    }, countdown.length * 1000); // Total time based on countdown length
+  };
 
   const handleTooltipOpen = () => {
     if (expanded) {
-      if (closeTimer) clearTimeout(closeTimer); 
+      if (closeTimer) clearTimeout(closeTimer);
       setTooltipOpen(true);
     }
   };
@@ -28,7 +49,7 @@ export default function Sidebar({ children }) {
   const handleTooltipClose = () => {
     closeTimer = setTimeout(() => {
       setTooltipOpen(false);
-    }, 1000); 
+    }, 1000);
   };
 
   const handleImmediateClose = () => {
@@ -83,7 +104,7 @@ export default function Sidebar({ children }) {
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => alert("You have successfully logged out!")}
+                      onClick={handleLogout}
                       style={{
                         backgroundColor: "#fa343e",
                         color: "white",
@@ -127,7 +148,9 @@ export default function Sidebar({ children }) {
                   >
                     <div className={`leading-4 ${expanded ? "" : "hidden"}`}>
                       <h4 className="font-semibold">NDRF Co-ordinator</h4>
-                      <span className="text-xs text-gray-600">NDRF@gmail.com</span>
+                      <span className="text-xs text-gray-600">
+                        NDRF@gmail.com
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -136,6 +159,40 @@ export default function Sidebar({ children }) {
           </ClickAwayListener>
         </Grid>
       </nav>
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="bg-white w-96 rounded-xl shadow-2xl border border-gray-200 p-6 text-center transform transition-all duration-300 ease-in-out animate-fade-in">
+          <div className="flex justify-center mb-4">
+            <HomeIcon 
+              className="text-blue-500 animate-bounce" 
+              size={64} 
+              strokeWidth={1.5}
+            />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+            Redirecting to Home
+          </h2>
+          <div className="flex items-center justify-center mb-4">
+            <span className="text-4xl font-bold text-blue-600 mr-2">
+              {countdown[currentIndex]}
+            </span>
+            <span className="text-gray-600">seconds remaining</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div 
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+              style={{ 
+                width: `${((countdown.length - currentIndex) / countdown.length) * 100}%` 
+              }}
+            ></div>
+          </div>
+          <div className="flex items-center justify-center text-sm text-gray-500 space-x-2">
+            <AlertCircle size={16} className="text-yellow-500" />
+            <p>Please wait while you are being redirected</p>
+          </div>
+        </div>
+      </div>
+      )}
     </aside>
   );
 }
