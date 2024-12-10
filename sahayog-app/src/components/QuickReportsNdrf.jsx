@@ -163,7 +163,7 @@ function QuickReports({ alert }) {
             className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 ease-in-out flex items-center justify-center space-x-2"
           >
             <Send className="h-5 w-5" />
-            <span>Submit Report</span>
+            <span>Submit Quick Note</span>
           </button>
         </form>
       </div>

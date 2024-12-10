@@ -309,7 +309,7 @@ function DetailedReports() {
                   icon={customIcon}
                 >
                   <Popup>
-                    {alert.location?.city}, {alert.location?.state}
+                   <a target="_blank" href={`https://www.google.com/maps?q=${alert.location?.coordinates.latitude},${alert.location?.coordinates.longitude}`}> {alert.location?.city}, {alert.location?.state}</a>
                   </Popup>
                 </Marker>
               </MapContainer>

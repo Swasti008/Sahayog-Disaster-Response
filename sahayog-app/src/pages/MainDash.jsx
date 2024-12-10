@@ -96,16 +96,6 @@ const MainDash = () => {
               />
             </Link>
 
-            <Link to="/dashboard/reports">
-              <SidebarItem
-                icon={<ClipboardPenLine size={20} />}
-                text="Track Reports"
-                active={activeItem === "detailed"}
-                alert={false}
-                onClick={() => setActiveItem("detailed")}
-              />
-            </Link>
-
             <button onClick={handleAlertsClick} className="w-full text-left">
               <SidebarItem
                 icon={<Bell size={24} />}
